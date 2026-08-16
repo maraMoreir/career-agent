@@ -1,0 +1,36 @@
+# Secrets / environment
+.env
+.env.local
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+
+# Runtime data that should NOT be versioned
+logs/
+*.log
+data/applications/applications.db
+data/applications/applications.db-journal
+data/applications/applications.db-wal
+data/applications/applications.db-shm
+
+# Generated resumes (tailored per job) - keep the master only
+data/resumes/tailored/
+
+# Backups
+*.bak
+*.backup-*
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

@@ -1,0 +1,10 @@
+# Dependencias do MCP job-search.
+# A instalacao real e feita pelo pyproject.toml da raiz (uv pip install -e .).
+
+mcp>=1.2.0          # protocolo MCP
+pydantic>=2.7       # normalizacao das vagas
+httpx>=0.27         # cliente HTTP para as APIs publicas (Remotive, Arbeitnow)
+python-dotenv>=1.0  # leitura do .env
+
+# NAO ha, e nao deve haver, dependencia de automacao de navegador
+# (selenium, playwright, puppeteer). Ver docs/SECURITY.md.

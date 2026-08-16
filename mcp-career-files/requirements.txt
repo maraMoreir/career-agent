@@ -1,0 +1,7 @@
+# Dependencias do MCP career-files.
+# A instalacao real e feita pelo pyproject.toml da raiz (uv pip install -e .).
+
+mcp>=1.2.0          # protocolo MCP
+python-dotenv>=1.0  # leitura do .env
+
+# Este servidor nao precisa de httpx: ele nao acessa a rede.

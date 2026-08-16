@@ -1,0 +1,7 @@
+# Dependencias do MCP career-agent.
+# A instalacao real e feita pelo pyproject.toml da raiz (uv pip install -e .).
+# Este arquivo documenta o que este servidor especificamente usa.
+
+mcp>=1.2.0          # protocolo MCP (SDK 1.x FastMCP ou 2.x MCPServer)
+pydantic>=2.7       # validacao dos modelos de dominio
+python-dotenv>=1.0  # leitura do .env
