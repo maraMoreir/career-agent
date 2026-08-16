@@ -57,6 +57,38 @@ def _guard(func):
     return wrapper
 
 
+def _no_results_guidance() -> str:
+    """Orientacao honesta quando as fontes automaticas nao entregam nada.
+
+    Existe porque a limitacao e estrutural, nao um acaso da busca: nao ha API
+    publica de vagas com boa cobertura do mercado brasileiro de .NET.
+    """
+    return (
+        "SOBRE O MERCADO BRASILEIRO - leia antes de tentar de novo\n"
+        "\n"
+        "As fontes automaticas deste projeto tem cobertura fraca para vagas\n"
+        ".NET no Brasil, e isso nao se resolve mudando os termos de busca:\n"
+        "\n"
+        "  - Remotive: o endpoint publico gratuito devolve um feed de amostra\n"
+        "    (~14 vagas) e ignora o parametro de pesquisa.\n"
+        "  - Arbeitnow: base quase toda europeia e presencial.\n"
+        "  - LinkedIn, Indeed e Gupy - onde as vagas brasileiras realmente\n"
+        "    estao - nao tem API publica de busca, e este projeto nao\n"
+        "    automatiza login, cookies nem cliques.\n"
+        "\n"
+        "O CAMINHO QUE FUNCIONA (modo manual):\n"
+        "  1. Busque no LinkedIn ou na Gupy pelo navegador, normalmente.\n"
+        "  2. Copie a URL da vaga e o texto da descricao.\n"
+        "  3. Cole aqui: 'Analise esta vaga: <URL>' + a descricao.\n"
+        "\n"
+        "A partir dai o agente faz tudo: score explicado por dimensao, gaps,\n"
+        "curriculo personalizado, mensagem para o recrutador, respostas do\n"
+        "formulario e registro no historico sem duplicata. E ai que esta o\n"
+        "valor do sistema - a busca automatica e o pedaco fraco, a analise\n"
+        "e o pedaco forte."
+    )
+
+
 def _format_job(job: Job, index: int, score_line: str = "") -> str:
     lines = [
         f"{index}. {job.title}",
@@ -160,6 +192,7 @@ def search_jobs(
                     _format_job(best_job, 1),
                 ]
             )
+        lines.extend(["", "-" * 60, _no_results_guidance()])
         return "\n".join(lines)
 
     lines.append(f"{len(visible)} vaga(s) com score >= {threshold:g}, ordenadas:")

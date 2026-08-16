@@ -896,12 +896,20 @@ Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
             <tr>
               <td class="name">remotive</td>
               <td>opcional</td>
-              <td><code>GET remotive.com/api/remote-jobs</code> — JSON publico, sem auth. So vagas remotas.</td>
+              <td>
+                <code>GET remotive.com/api/remote-jobs</code> — JSON publico, sem auth.
+                <strong>Feed de amostra de 14 vagas que ignora o parametro de busca.</strong>
+                Zero vagas .NET. O filtro por palavra-chave e feito do lado do cliente.
+              </td>
             </tr>
             <tr>
               <td class="name">arbeitnow</td>
               <td>opcional</td>
-              <td><code>GET arbeitnow.com/api/job-board-api</code> — JSON publico, sem auth. Base majoritariamente europeia.</td>
+              <td>
+                <code>GET arbeitnow.com/api/job-board-api</code> — JSON publico, sem auth.
+                175 vagas concentradas em Londres, Berlim e Munique, presenciais.
+                <strong>Zero com .NET/C#.</strong>
+              </td>
             </tr>
             <tr>
               <td class="name">linkedin</td>
@@ -920,6 +928,24 @@ Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="callout warn">
+        <span class="tag">Medido em agosto de 2026, nao estimado</span>
+        <p>
+          <strong>A busca automatica praticamente nao serve para vagas .NET no
+          Brasil.</strong> A Remotive devolve as mesmas 14 vagas para
+          <code>.net</code>, <code>python</code> ou uma consulta sem sentido —
+          o parametro de busca e inerte, e o feed nao tem nenhuma vaga de
+          engenharia .NET. O Arbeitnow tem 175 vagas, todas europeias e
+          presenciais, nenhuma com .NET ou C#.
+        </p>
+        <p>
+          Isso nao se resolve mudando os termos de busca. Nao existe API
+          publica com boa cobertura do mercado brasileiro. <strong>Use o modo
+          manual</strong> — e onde o sistema entrega valor de verdade: a busca
+          e a parte fraca, a analise e a parte forte.
+        </p>
       </div>
 
       <p>

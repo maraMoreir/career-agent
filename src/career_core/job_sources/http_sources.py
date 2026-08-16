@@ -95,18 +95,31 @@ class _HttpJobSource(IJobSource):
 
 
 class RemotiveJobSource(_HttpJobSource):
-    """Vagas remotas via API publica da Remotive."""
+    """Vagas remotas via API publica da Remotive.
+
+    LIMITACAO VERIFICADA (2026-08): o endpoint publico gratuito devolve um
+    feed de AMOSTRA fixo (~14 vagas) e **ignora** os parametros `search` e
+    `category` - a mesma resposta volta para '.net', 'python' ou uma consulta
+    sem sentido. Por isso a filtragem por palavra-chave e feita do lado do
+    cliente, e a mensagem avisa quando o feed nao tem nada relevante.
+    """
 
     name = "remotive"
     endpoint = "https://remotive.com/api/remote-jobs"
     provenance = (
         "API JSON publica e documentada da Remotive (remotive.com/api/remote-jobs). "
-        "Sem autenticacao, sem cookies, sem scraping. Somente vagas remotas."
+        "Sem autenticacao, sem cookies, sem scraping. Somente vagas remotas. "
+        "ATENCAO: o endpoint gratuito devolve um feed de amostra pequeno e "
+        "ignora o parametro de busca - raramente traz vagas .NET."
     )
     usable = True
 
+    #: Abaixo disso, o feed e claramente uma amostra, nao um resultado de busca.
+    _SAMPLE_FEED_THRESHOLD = 60
+
     def search(self, query: JobQuery) -> SourceResult:
-        params: dict[str, Any] = {"limit": min(self._max_results, query.limit or 25)}
+        # `search` e enviado por completude, mas nao surta efeito hoje.
+        params: dict[str, Any] = {}
         if query.keywords:
             params["search"] = query.keywords
 
@@ -116,15 +129,27 @@ class RemotiveJobSource(_HttpJobSource):
             logger.warning("remotive indisponivel: %s", exc)
             return SourceResult(source=self.name, ok=False, message=str(exc))
 
+        entries = payload.get("jobs", []) or []
+        total = int(payload.get("total-job-count") or len(entries))
+
+        keywords = [k for k in normalize_text(query.keywords).split() if len(k) > 1]
         jobs: list[Job] = []
-        for entry in payload.get("jobs", []) or []:
+        for entry in entries:
             try:
                 job = self._to_job(entry)
             except Exception:
                 logger.exception("remotive: entrada ignorada por erro de parse")
                 continue
-            if self._matches_location(job, query.location):
-                jobs.append(job)
+
+            # Filtro do lado do cliente: a API nao filtra por conta propria.
+            if keywords:
+                haystack = normalize_text(job.searchable_text())
+                if not any(k in haystack for k in keywords):
+                    continue
+            if not self._matches_location(job, query.location):
+                continue
+
+            jobs.append(job)
             if len(jobs) >= self._max_results:
                 break
 
@@ -132,11 +157,31 @@ class RemotiveJobSource(_HttpJobSource):
             source=self.name,
             jobs=jobs,
             ok=True,
-            message=(
-                f"{len(jobs)} vaga(s) da Remotive (API publica). "
-                f"Somente vagas remotas; confirme se aceitam candidatas no Brasil."
-            ),
+            message=self._message(len(jobs), len(entries), total, query),
         )
+
+    def _message(self, found: int, feed_size: int, total: int, query: JobQuery) -> str:
+        if found:
+            return (
+                f"{found} vaga(s) da Remotive (API publica, so remotas). "
+                f"Confirme se aceitam candidatas no Brasil. Fonte: Remotive."
+            )
+
+        base = (
+            f"0 vaga(s) relevantes na Remotive para "
+            f"'{query.keywords or 'sua busca'}'."
+        )
+        if total <= self._SAMPLE_FEED_THRESHOLD:
+            return (
+                f"{base} O endpoint publico gratuito devolveu apenas {feed_size} "
+                f"vaga(s) no total - e um feed de AMOSTRA, nao uma busca real: "
+                f"ele ignora o parametro de pesquisa. Nao espere encontrar vagas "
+                f".NET por aqui. Use o modo manual "
+                f"(`get_manual_search_guide`) para trazer vagas do LinkedIn ou "
+                f"da Gupy - e o caminho que realmente funciona para o mercado "
+                f"brasileiro."
+            )
+        return f"{base} Nenhuma das {feed_size} vagas do feed bate com o perfil."
 
     def _to_job(self, entry: dict[str, Any]) -> Job:
         description = strip_html(str(entry.get("description") or ""))
@@ -208,15 +253,19 @@ class ArbeitnowJobSource(_HttpJobSource):
             if len(jobs) >= min(self._max_results, query.limit or self._max_results):
                 break
 
-        return SourceResult(
-            source=self.name,
-            jobs=jobs,
-            ok=True,
-            message=(
-                f"{len(jobs)} vaga(s) do Arbeitnow (API publica). "
-                f"Base majoritariamente europeia - verifique elegibilidade."
-            ),
+        message = (
+            f"{len(jobs)} vaga(s) do Arbeitnow (API publica). "
+            f"Base majoritariamente europeia (Londres, Berlim, Munique) e "
+            f"presencial - verifique elegibilidade e visto."
+            if jobs
+            else (
+                f"0 vaga(s) relevantes no Arbeitnow entre as {len(payload.get('data', []) or [])} "
+                f"do feed. A base e quase toda europeia e presencial, com pouca "
+                f"presenca de .NET/C#. Para o mercado brasileiro, use o modo "
+                f"manual (`get_manual_search_guide`)."
+            )
         )
+        return SourceResult(source=self.name, jobs=jobs, ok=True, message=message)
 
     def _to_job(self, entry: dict[str, Any]) -> Job:
         description = strip_html(str(entry.get("description") or ""))

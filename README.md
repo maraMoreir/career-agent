@@ -425,9 +425,21 @@ Voce consegue se candidatar por mim no LinkedIn?
   resto. Isso e uma escolha de seguranca, nao uma pendencia.
 - **A fonte padrao e `mock`** (catalogo ficticio, offline). Vagas reais exigem
   ligar `JOB_SEARCH_ENABLE_NETWORK=true`.
-- **Remotive e Arbeitnow tem cobertura limitada no Brasil.** Remotive so tem
-  vagas remotas; Arbeitnow e majoritariamente europeu. Sao as APIs publicas
-  legitimas que existem hoje — nao ha equivalente brasileiro aberto.
+- **A busca automatica praticamente nao serve para vagas .NET no Brasil.**
+  Isso foi medido, nao estimado (agosto/2026):
+  - **Remotive**: o endpoint publico gratuito devolve um feed de **amostra de
+    14 vagas** e **ignora o parametro `search`** — a mesma resposta volta para
+    `.net`, `python` ou uma consulta sem sentido. Nenhuma vaga de engenharia
+    .NET. O projeto passou a filtrar do lado do cliente e a avisar disso.
+  - **Arbeitnow**: 175 vagas no feed, concentradas em Londres, Berlim e
+    Munique, presenciais. **Zero** com .NET/C#.
+  - **LinkedIn, Indeed e Gupy** — onde as vagas brasileiras de fato estao —
+    nao tem API publica de busca para candidatos.
+
+  Na pratica: **use o modo manual.** Voce busca no portal pelo navegador,
+  cola a vaga aqui, e o agente faz score, gaps, curriculo, mensagem e
+  historico. A busca automatica e a parte fraca do sistema; a analise e a
+  parte forte.
 - **A extracao de requisitos e heuristica.** Funciona bem com descricoes em
   bullets; com texto corrido, os requisitos saem menos estruturados.
 - **A deteccao de senioridade e por palavra-chave** no titulo e na descricao.

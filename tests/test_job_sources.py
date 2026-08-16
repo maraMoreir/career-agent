@@ -217,6 +217,74 @@ def test_linkedin_explica_por_que_nao_automatiza(settings):
     assert "nao automatiza" in message or "não automatiza" in message
 
 
+# ---------------------------------------------------------------------------
+# Remotive: o feed publico ignora o parametro de busca
+# ---------------------------------------------------------------------------
+
+
+def _fake_remotive(monkeypatch, entries: list[dict], total: int | None = None):
+    from career_core.job_sources.http_sources import RemotiveJobSource
+
+    source = RemotiveJobSource(user_agent="tests", min_interval=0.0)
+    payload = {"jobs": entries, "total-job-count": total if total is not None else len(entries)}
+    monkeypatch.setattr(source, "_fetch", lambda params: payload)
+    return source
+
+
+_REMOTIVE_SAMPLE = [
+    {
+        "id": 1, "title": "Freelance Copywriter", "company_name": "Acme",
+        "url": "https://remotive.com/1", "description": "Write copy.",
+        "tags": ["writing"], "candidate_required_location": "Worldwide",
+        "salary": "", "publication_date": "",
+    },
+    {
+        "id": 2, "title": "Senior Backend Engineer (.NET)", "company_name": "Contoso",
+        "url": "https://remotive.com/2", "description": "C# and ASP.NET Core.",
+        "tags": ["c#", ".net"], "candidate_required_location": "Worldwide",
+        "salary": "", "publication_date": "",
+    },
+]
+
+
+def test_remotive_filtra_do_lado_do_cliente(monkeypatch):
+    """A API ignora `search`; o filtro precisa acontecer aqui."""
+    source = _fake_remotive(monkeypatch, _REMOTIVE_SAMPLE)
+    result = source.search(JobQuery(keywords=".net backend"))
+    assert [j.title for j in result.jobs] == ["Senior Backend Engineer (.NET)"]
+
+
+def test_remotive_avisa_quando_o_feed_e_amostra(monkeypatch):
+    source = _fake_remotive(monkeypatch, _REMOTIVE_SAMPLE[:1], total=14)
+    result = source.search(JobQuery(keywords="backend .net c#"))
+    assert result.jobs == []
+    assert result.ok
+    message = result.message.lower()
+    assert "amostra" in message
+    assert "ignora o parametro" in message
+    assert "modo manual" in message
+
+
+def test_remotive_sem_palavra_chave_devolve_o_feed(monkeypatch):
+    source = _fake_remotive(monkeypatch, _REMOTIVE_SAMPLE)
+    assert len(source.search(JobQuery()).jobs) == 2
+
+
+def test_remotive_falha_de_rede_nao_quebra_a_busca(monkeypatch):
+    from career_core.errors import JobSourceError
+    from career_core.job_sources.http_sources import RemotiveJobSource
+
+    source = RemotiveJobSource(user_agent="tests", min_interval=0.0)
+
+    def boom(_params):
+        raise JobSourceError("timeout")
+
+    monkeypatch.setattr(source, "_fetch", boom)
+    result = source.search(JobQuery(keywords=".net"))
+    assert result.ok is False
+    assert result.jobs == []
+
+
 def test_nenhuma_fonte_http_aponta_para_portal_proibido():
     """Guarda-corpo: nenhum endpoint pode apontar para LinkedIn/Indeed/Gupy."""
     from career_core.job_sources.http_sources import ArbeitnowJobSource, RemotiveJobSource
