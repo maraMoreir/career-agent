@@ -1,0 +1,1148 @@
+<title>Career Agent</title>
+<style>
+  /* ============================================================
+     Palette — cool slate neutrals with a petrol accent.
+     Type — the Windows developer stack: Segoe UI + Cascadia Mono,
+     chosen because this project lives on Windows, in .NET tooling.
+     ============================================================ */
+
+  :root {
+    --paper:      #F5F7F9;
+    --surface:    #FFFFFF;
+    --surface-2:  #EDF0F3;
+    --ink:        #171C22;
+    --ink-2:      #454F5A;
+    --ink-3:      #6B7783;
+    --rule:       #D6DCE3;
+    --rule-soft:  #E4E9ED;
+
+    --accent:     #0C6157;
+    --accent-2:   #0A4E46;
+    --accent-bg:  #E2EFEC;
+
+    --deny:       #A32A20;
+    --deny-bg:    #F7E7E5;
+    --warn:       #7A5100;
+    --warn-bg:    #F6EEDC;
+
+    --shadow: 0 1px 2px rgba(23, 28, 34, .05), 0 8px 24px -12px rgba(23, 28, 34, .18);
+
+    --display: "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --body:    "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono:    "Cascadia Mono", "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:      #0E1216;
+      --surface:    #161C22;
+      --surface-2:  #1E262E;
+      --ink:        #E6EBF0;
+      --ink-2:      #AFBAC5;
+      --ink-3:      #7E8C99;
+      --rule:       #2C363F;
+      --rule-soft:  #232C34;
+
+      --accent:     #58C4B2;
+      --accent-2:   #7FD8C8;
+      --accent-bg:  #122B29;
+
+      --deny:       #F08A7E;
+      --deny-bg:    #2C1A18;
+      --warn:       #E0AC55;
+      --warn-bg:    #2A2116;
+
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .7);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:      #0E1216;
+    --surface:    #161C22;
+    --surface-2:  #1E262E;
+    --ink:        #E6EBF0;
+    --ink-2:      #AFBAC5;
+    --ink-3:      #7E8C99;
+    --rule:       #2C363F;
+    --rule-soft:  #232C34;
+
+    --accent:     #58C4B2;
+    --accent-2:   #7FD8C8;
+    --accent-bg:  #122B29;
+
+    --deny:       #F08A7E;
+    --deny-bg:    #2C1A18;
+    --warn:       #E0AC55;
+    --warn-bg:    #2A2116;
+
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -12px rgba(0, 0, 0, .7);
+  }
+
+  /* ---------- base ---------- */
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    display: grid;
+    grid-template-columns: 200px minmax(0, 1fr);
+    gap: 56px;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 28px 120px;
+  }
+
+  @media (max-width: 900px) {
+    .wrap { grid-template-columns: minmax(0, 1fr); gap: 0; padding: 0 20px 80px; }
+    .toc { display: none; }
+  }
+
+  /* ---------- sidebar ---------- */
+
+  .toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding-top: 96px;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .toc-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 14px;
+  }
+
+  .toc ol {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    counter-reset: nav;
+  }
+
+  .toc a {
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    gap: 6px;
+    padding: 4px 0;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13.5px;
+    line-height: 1.4;
+    border-radius: 3px;
+  }
+
+  .toc a::before {
+    counter-increment: nav;
+    content: counter(nav, decimal-leading-zero);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--ink-3);
+    padding-top: 3px;
+  }
+
+  .toc a:hover { color: var(--accent); }
+  .toc a:hover::before { color: var(--accent); }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ---------- masthead ---------- */
+
+  header.masthead { padding: 96px 0 0; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-size: clamp(38px, 6vw, 60px);
+    font-weight: 700;
+    letter-spacing: -.028em;
+    line-height: 1.02;
+    margin: 14px 0 0;
+    text-wrap: balance;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    font-size: 18.5px;
+    line-height: 1.6;
+    color: var(--ink-2);
+    margin-top: 18px;
+  }
+
+  /* ---------- datasheet strip ---------- */
+
+  .datasheet {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 40px;
+  }
+
+  .datasheet div {
+    background: var(--surface);
+    padding: 14px 16px;
+  }
+
+  .datasheet dt {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .datasheet dd {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    margin-top: 5px;
+  }
+
+  /* ---------- sections ---------- */
+
+  section { padding-top: 72px; scroll-margin-top: 24px; }
+
+  h2 {
+    font-family: var(--display);
+    font-size: 27px;
+    font-weight: 650;
+    letter-spacing: -.018em;
+    line-height: 1.2;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--rule);
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--display);
+    font-size: 17px;
+    font-weight: 650;
+    letter-spacing: -.008em;
+    margin-top: 34px;
+  }
+
+  p { max-width: var(--measure); margin-top: 14px; color: var(--ink-2); }
+  p strong { color: var(--ink); font-weight: 620; }
+  section > p:first-of-type { margin-top: 20px; }
+
+  a { color: var(--accent); }
+
+  ul.plain {
+    max-width: var(--measure);
+    margin-top: 14px;
+    padding-left: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  ul.plain li {
+    color: var(--ink-2);
+    padding-left: 20px;
+    position: relative;
+  }
+
+  ul.plain li::before {
+    content: "";
+    position: absolute;
+    left: 3px;
+    top: 11px;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: .885em;
+    background: var(--surface-2);
+    padding: 1.5px 5px;
+    border-radius: 3px;
+    color: var(--ink);
+  }
+
+  /* ---------- tables ---------- */
+
+  .scroller {
+    overflow-x: auto;
+    margin-top: 22px;
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+
+  th {
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 11px 16px;
+    border-bottom: 1px solid var(--rule-soft);
+    color: var(--ink-2);
+    vertical-align: top;
+  }
+
+  tr:last-child td { border-bottom: none; }
+  td.name { color: var(--ink); font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+
+  /* ---------- weight bars ---------- */
+
+  .bar {
+    display: block;
+    height: 6px;
+    min-width: 3px;
+    border-radius: 1px;
+    background: var(--accent);
+  }
+  td.barcell { width: 132px; padding-top: 17px; }
+
+  /* ---------- allow / deny ---------- */
+
+  .split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .panel {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+    padding: 20px 22px 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .panel h3 {
+    margin: 0 0 4px;
+    font-size: 13px;
+    font-family: var(--mono);
+    font-weight: 600;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .panel.allow h3 { color: var(--accent); }
+  .panel.deny h3  { color: var(--deny); }
+
+  .panel ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+  .panel li {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  .panel li::before { font-family: var(--mono); font-size: 13px; line-height: 1.6; }
+  .panel.allow li::before { content: "+"; color: var(--accent); }
+  .panel.deny  li::before { content: "\00d7"; color: var(--deny); }
+
+  /* ---------- callout ---------- */
+
+  .callout {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+    padding: 18px 22px;
+    margin-top: 26px;
+    max-width: var(--measure);
+  }
+
+  .callout.warn { background: var(--warn-bg); border-color: color-mix(in srgb, var(--warn) 30%, transparent); }
+  .callout.key  { background: var(--accent-bg); border-color: color-mix(in srgb, var(--accent) 32%, transparent); }
+
+  .callout p { margin-top: 0; color: var(--ink); }
+  .callout p + p { margin-top: 10px; }
+
+  .callout .tag {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .callout.warn .tag { color: var(--warn); }
+  .callout.key  .tag { color: var(--accent); }
+
+  /* ---------- code blocks ---------- */
+
+  pre {
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.65;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 16px 18px;
+    margin-top: 20px;
+    overflow-x: auto;
+    color: var(--ink-2);
+    tab-size: 2;
+  }
+
+  pre b { color: var(--ink); font-weight: 600; }
+  pre i { color: var(--ink-3); font-style: normal; }
+  pre em { color: var(--accent); font-style: normal; }
+  pre s  { color: var(--deny); text-decoration: none; }
+
+  /* ---------- score readout ---------- */
+
+  .readout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+    margin-top: 24px;
+  }
+
+  .verdict {
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    background: var(--surface);
+    padding: 20px 22px;
+  }
+
+  .verdict .score {
+    font-family: var(--mono);
+    font-size: 44px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.03em;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .verdict .score span { font-size: 19px; color: var(--ink-3); }
+
+  .pill {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  }
+
+  .pill.gap { background: var(--warn-bg); color: var(--warn); border-color: color-mix(in srgb, var(--warn) 32%, transparent); }
+
+  footer {
+    margin-top: 96px;
+    padding-top: 22px;
+    border-top: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-3);
+    line-height: 1.8;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+
+<div class="wrap">
+
+  <nav class="toc" aria-label="Sumario">
+    <div class="toc-label">Sumario</div>
+    <ol>
+      <li><a href="#oque">O que e</a></li>
+      <li><a href="#limites">Faz e nao faz</a></li>
+      <li><a href="#arquitetura">Arquitetura</a></li>
+      <li><a href="#score">Score</a></li>
+      <li><a href="#aprovacao">Aprovacao</a></li>
+      <li><a href="#honestidade">Honestidade</a></li>
+      <li><a href="#fontes">Fontes de vagas</a></li>
+      <li><a href="#ferramentas">Ferramentas MCP</a></li>
+      <li><a href="#arquivos">Arquivos</a></li>
+      <li><a href="#comandos">Comandos</a></li>
+      <li><a href="#usar">Como usar</a></li>
+      <li><a href="#limitacoes">Limitacoes</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+    <header class="masthead">
+      <div class="eyebrow">v1.0.0 &middot; Windows &middot; Claude Desktop &middot; MCP</div>
+      <h1>Career Agent</h1>
+      <p class="standfirst">
+        Tres servidores MCP que encontram vagas, calculam compatibilidade com o
+        seu perfil, personalizam seu curriculo sem inventar nada e mantem o
+        historico de candidaturas. O agente prepara tudo. Voce da o clique final.
+      </p>
+
+      <dl class="datasheet">
+        <div><dt>Raiz</dt><dd>C:\career-agent</dd></div>
+        <div><dt>Servidores MCP</dt><dd>3</dd></div>
+        <div><dt>Ferramentas</dt><dd>21</dd></div>
+        <div><dt>Testes pytest</dt><dd>210</dd></div>
+        <div><dt>Checagens MCP</dt><dd>106</dd></div>
+        <div><dt>Python</dt><dd>3.14.6</dd></div>
+      </dl>
+    </header>
+
+    <section id="oque">
+      <h2>O que e</h2>
+      <p>
+        Um copiloto de carreira para uma desenvolvedora Backend/FullStack com
+        foco em .NET. Ele conversa com voce dentro do Claude Desktop e cobre o
+        ciclo inteiro de uma candidatura, menos o clique de enviar.
+      </p>
+      <ul class="plain">
+        <li>Busca vagas em APIs publicas e normaliza tudo num formato unico.</li>
+        <li>Pontua cada vaga de 0 a 100 em sete dimensoes, sempre com a justificativa.</li>
+        <li>Elimina automaticamente o que nao serve — senioridade errada, empresa bloqueada, vaga repetida.</li>
+        <li>Reorganiza e destaca o seu curriculo para cada vaga, sem criar fatos novos.</li>
+        <li>Escreve rascunho de mensagem para o recrutador e de respostas para o formulario.</li>
+        <li>Registra a candidatura e acompanha o status ate a oferta.</li>
+      </ul>
+    </section>
+
+    <section id="limites">
+      <h2>O que ele faz e o que ele recusa</h2>
+      <p>
+        A coluna da direita nao e uma lista de pendencias. Sao decisoes de
+        projeto, com teste automatizado que falha se alguem tentar adicionar
+        qualquer uma delas.
+      </p>
+
+      <div class="split">
+        <div class="panel allow">
+          <h3>Faz</h3>
+          <ul>
+            <li>Busca em APIs publicas, documentadas e sem autenticacao</li>
+            <li>Analisa qualquer vaga que voce colar, venha de onde vier</li>
+            <li>Calcula e explica o score de compatibilidade</li>
+            <li>Detecta candidatura duplicada antes de voce repetir</li>
+            <li>Personaliza o curriculo reordenando e destacando</li>
+            <li>Gera mensagens e respostas como rascunho</li>
+            <li>Registra e acompanha o historico</li>
+          </ul>
+        </div>
+
+        <div class="panel deny">
+          <h3>Nao faz</h3>
+          <ul>
+            <li>Login automatico no LinkedIn ou em qualquer portal</li>
+            <li>Armazenar senha, cookie ou token de sessao</li>
+            <li>Capturar sessao do navegador</li>
+            <li>Automatizar cliques em portais de vagas</li>
+            <li>Enviar candidatura sozinho</li>
+            <li>Enviar mensagem sozinho</li>
+            <li>Burlar anti-bot ou resolver CAPTCHA</li>
+            <li>Scraping agressivo</li>
+            <li>Inventar experiencia que voce nao tem</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <span class="tag">Por que recusar</span>
+        <p>
+          Automatizar o LinkedIn viola os Termos de Servico e contas
+          automatizadas sao detectadas e bloqueadas. Perder a conta custa muito
+          mais do que qualquer ganho de velocidade. Um cookie de sessao guardado
+          em disco da acesso total a conta, sem senha e sem MFA.
+        </p>
+        <p>
+          O que existe no lugar funciona bem: voce busca no navegador, copia a
+          URL e a descricao, e o agente faz score, gaps, curriculo, mensagem e
+          historico. O clique final continua seu — que e exatamente o ponto.
+        </p>
+      </div>
+    </section>
+
+    <section id="arquitetura">
+      <h2>Arquitetura</h2>
+      <p>
+        O principio que organiza tudo: <strong>o dominio nao conhece MCP</strong>.
+        Toda regra de negocio vive em <code>career_core</code>, que nao importa
+        nada do SDK. Os tres <code>server.py</code> sao adapters finos —
+        traduzem argumentos, chamam o dominio, formatam texto.
+      </p>
+
+<pre>                       <b>Claude Desktop</b>
+                             |
+             +---------------+---------------+
+             |               |               |
+      <b>career-agent</b>     <b>job-search</b>     <b>career-files</b>
+      perfil, score      busca e         leitura em
+      candidatura,       normalizacao    sandbox
+      historico          de vagas        (somente data/)
+             |               |               |
+             +---------------+---------------+
+                             |
+                       <b>career_core</b>
+                 <i>dominio puro — sem MCP</i>
+                             |
+   +--------+--------+-------+-------+--------+--------+
+   |        |        |       |       |        |        |
+ profile  scoring  applications resume job_sources security
+  (.md)   (7 dim.) (SQLite+JSON) (tailor) (IJobSource) (gate)</pre>
+
+      <p>
+        Isso torna 100% da logica testavel sem subir servidor nenhum. Quando o
+        SDK do MCP renomeou <code>FastMCP</code> para <code>MCPServer</code> na
+        versao 2.0, a correcao foi um unico arquivo de compatibilidade.
+      </p>
+
+      <h3>Decisoes que valem explicacao</h3>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Decisao</th><th>Por que</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">SQLite + espelho JSON</td>
+              <td>
+                PostgreSQL exigiria servidor e credenciais sem ganho na escala de
+                uma pessoa. JSON puro corrompe o historico se o processo morrer
+                no meio da escrita. SQLite da transacao e indice com zero
+                configuracao; o <code>applications.json</code> continua sendo
+                gerado de forma atomica para leitura humana e diff no Git.
+                O espelho e <strong>somente escrita</strong> — nunca lido de
+                volta, entao as duas fontes nao tem como divergir.
+              </td>
+            </tr>
+            <tr>
+              <td class="name">Dimensoes de score<br>como classes</td>
+              <td>
+                Cada dimensao sabe pontuar <em>e explicar</em> um unico aspecto.
+                O somador so soma. Adicionar uma dimensao nao altera o somador.
+                Se uma dimensao lanca excecao, ela pontua zero e e logada — o
+                score inteiro nao cai junto.
+              </td>
+            </tr>
+            <tr>
+              <td class="name">Perfil em Markdown</td>
+              <td>
+                Voce edita <code>data/profile/*.md</code> e o score de todas as
+                vagas muda na proxima pergunta. Sem tela de cadastro, sem
+                migracao, sem estado duplicado.
+              </td>
+            </tr>
+            <tr>
+              <td class="name">Rede desligada<br>por padrao</td>
+              <td>
+                A V1 sai com a fonte <code>mock</code>. O fluxo inteiro roda
+                offline, os testes sao deterministicos, e nada sai para a
+                internet sem voce ligar explicitamente.
+              </td>
+            </tr>
+            <tr>
+              <td class="name">python.exe do venv<br>no config, nao uv</td>
+              <td>
+                O Claude Desktop inicia os servidores sem carregar seu PATH
+                completo. Apontar direto para o interpretador elimina essa
+                dependencia. O <code>uv</code> segue sendo a ferramenta de
+                instalacao e de testes.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="score">
+      <h2>Score</h2>
+      <p>
+        Zero a cem, sempre acompanhado da justificativa de cada dimensao. Um
+        numero sem explicacao nao ajuda a decidir nada.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Dimensao</th><th>Peso</th><th></th><th>O que mede</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">Stack tecnica</td><td class="num">30</td>
+              <td class="barcell"><span class="bar" style="width:100%"></span></td>
+              <td>Tecnologias exigidas vs. tecnologias do perfil, com resolucao de aliases</td>
+            </tr>
+            <tr>
+              <td class="name">Senioridade</td><td class="num">20</td>
+              <td class="barcell"><span class="bar" style="width:66.7%"></span></td>
+              <td>Nivel da vaga vs. nivel desejado</td>
+            </tr>
+            <tr>
+              <td class="name">Salario</td><td class="num">15</td>
+              <td class="barcell"><span class="bar" style="width:50%"></span></td>
+              <td>Faixa oferecida vs. minimo e alvo</td>
+            </tr>
+            <tr>
+              <td class="name">Modalidade</td><td class="num">10</td>
+              <td class="barcell"><span class="bar" style="width:33.3%"></span></td>
+              <td>Remoto / hibrido / presencial vs. sua ordem de preferencia</td>
+            </tr>
+            <tr>
+              <td class="name">Localizacao</td><td class="num">10</td>
+              <td class="barcell"><span class="bar" style="width:33.3%"></span></td>
+              <td>Compatibilidade geografica — remoto neutraliza a distancia</td>
+            </tr>
+            <tr>
+              <td class="name">Experiencia</td><td class="num">10</td>
+              <td class="barcell"><span class="bar" style="width:33.3%"></span></td>
+              <td>Arquitetura e dominio exigidos vs. declarados</td>
+            </tr>
+            <tr>
+              <td class="name">Empresa</td><td class="num">5</td>
+              <td class="barcell"><span class="bar" style="width:16.7%"></span></td>
+              <td>Listas de preferencia e bloqueio, e sinais na descricao</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Classificacao</h3>
+<pre><em>90-100</em>  PRIORIDADE ALTA
+<em>80-89</em>   PRIORIDADE
+<em>70-79</em>   ANALISAR
+<s> 0-69</s>   DESCARTAR</pre>
+
+      <p>
+        Independente da pontuacao, a vaga vira <code>DESCARTAR</code> quando a
+        senioridade esta na sua lista de exclusao (estagio, trainee, junior) ou
+        a empresa esta bloqueada. O detalhamento continua visivel — voce ve o
+        que ela teria pontuado e por que foi eliminada.
+      </p>
+
+      <h3>Saida real do sistema</h3>
+
+      <div class="readout">
+        <div class="verdict">
+          <div class="score">87,3<span>/100</span></div>
+          <span class="pill">Prioridade</span>
+          <p style="font-size:13.5px;margin-top:14px">
+            Backend .NET Senior &middot; Cerrado Software &middot; hibrido em Goiania
+          </p>
+        </div>
+        <div class="verdict">
+          <div class="score" style="font-size:22px;line-height:1.5">
+            azure<br>kafka
+          </div>
+          <span class="pill gap">Gaps identificados</span>
+          <p style="font-size:13.5px;margin-top:14px">
+            Reportados como gap. Nunca convertidos em experiencia.
+          </p>
+        </div>
+      </div>
+
+<pre>Stack tecnica: <b>27.67</b>/30   <i>16/18 tecnologias exigidas estao no perfil (89%); core .NET/C# presente</i>
+Senioridade:   <b>20</b>/20      <i>nivel 'senior' e exatamente o alvo</i>
+Salario:       <b>9</b>/15       <i>vaga informa R$ 14.000 a R$ 17.000, mas o perfil nao define minimo</i>
+Modalidade:    <b>7</b>/10       <i>'hibrido' e a 2a opcao na sua ordem de preferencia</i>
+Localizacao:   <b>10</b>/10      <i>vaga em cidade preferida (Goiania, GO)</i>
+Experiencia:   <b>8.6</b>/10     <i>6/6 areas exigidas presentes; sem exigencia explicita de anos</i>
+Empresa:       <b>5</b>/5        <i>beneficios citados (4)</i></pre>
+
+      <div class="callout key">
+        <span class="tag">Leia os dois pontos fracos</span>
+        <p>
+          Salario 9/15 e Experiencia 8.6/10 caem por <strong>falta de dado
+          seu</strong>, nao por defeito da vaga. Preencher salario minimo em
+          <code>preferences.md</code> e anos de experiencia em
+          <code>profile.md</code> sobe o score de todas as vagas boas e melhora
+          a separacao entre elas.
+        </p>
+      </div>
+    </section>
+
+    <section id="aprovacao">
+      <h2>Aprovacao humana</h2>
+      <p>
+        Toda candidatura nasce em <code>pending_approval</code>. A maquina de
+        estados nao tem caminho de <code>pending_approval</code> para
+        <code>applied</code>. Nenhuma candidatura pode ser marcada como enviada
+        sem que voce tenha, em algum momento, aprovado explicitamente.
+      </p>
+
+<pre>pending_approval ──▶ <em>approved</em> ──▶ applied ──▶ interview ──▶ offer
+       │                  │            │       ╰──▶ technical_test ──╯
+       ╰──▶ rejected      ╰──▶ withdrawn ╰──▶ rejected / withdrawn
+
+       <s>pending_approval ──▶ applied</s>   <i>bloqueado pelo ApprovalGate</i></pre>
+
+      <p>A tentativa de atalho devolve isto, antes de qualquer escrita no banco:</p>
+
+<pre><s>Nao e possivel ir de 'pending_approval' direto para 'applied'.</s>
+Toda candidatura precisa da sua aprovacao explicita primeiro:
+mude para 'approved' e so entao para 'applied'.
+Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
+    </section>
+
+    <section id="honestidade">
+      <h2>Honestidade factual</h2>
+      <p>
+        O perfil e a unica fonte de verdade sobre a sua experiencia. Uma
+        tecnologia aparecer na descricao da vaga <strong>nao</strong> significa
+        que voce tem experiencia nela.
+      </p>
+      <p>
+        Um componente chamado <code>FactGuard</code> audita todo texto gerado —
+        resumo adaptado, mensagem ao recrutador, respostas sugeridas, curriculo
+        personalizado. Ele identifica as tecnologias exigidas pela vaga que nao
+        estao no seu perfil e reprova qualquer afirmacao sobre elas.
+      </p>
+
+      <div class="split">
+        <div class="panel deny">
+          <h3>Reprovado</h3>
+          <ul>
+            <li>"Experiencia solida com Azure"</li>
+            <li>"Trabalhei com Kafka por 3 anos"</li>
+            <li>"Dominio de Azure"</li>
+            <li>"Azure: 5 anos de experiencia"</li>
+            <li>"Sou certificada em Azure"</li>
+          </ul>
+        </div>
+        <div class="panel allow">
+          <h3>Aprovado</h3>
+          <ul>
+            <li>"Nao consta no meu perfil experiencia com Azure — e um gap para esta vaga"</li>
+            <li>"Tenho interesse e disposicao para aprender, e minha base em C#/.NET facilita a curva"</li>
+            <li>"Atuo com C#, .NET e ASP.NET Core, aplicando Clean Architecture e SOLID"</li>
+          </ul>
+        </div>
+      </div>
+
+      <p>
+        A personalizacao do curriculo so pode reordenar, destacar e adaptar
+        palavras-chave para itens que ja existem no perfil. O curriculo base
+        nunca e modificado — ha um teste que verifica isso byte a byte. Quando
+        uma resposta precisa de um dado que so voce tem, o agente escreve
+        <code>PREENCHA:</code> e explica o que falta, em vez de inventar o
+        exemplo.
+      </p>
+
+      <div class="callout key">
+        <span class="tag">Anos de experiencia</span>
+        <p>
+          Voce nao declarou tempo de carreira, entao o campo ficou como
+          <code>nao informado</code> e o sistema mantem <code>None</code>.
+          Ele <strong>nao deduz</strong> um numero. Enquanto estiver assim, a
+          parte de anos da dimensao Experiencia usa nota neutra.
+        </p>
+      </div>
+    </section>
+
+    <section id="fontes">
+      <h2>Fontes de vagas</h2>
+      <p>
+        Todas atras da interface <code>IJobSource</code>. Os dois endpoints HTTP
+        foram verificados contra a resposta real antes de escrever o parser —
+        nenhum endpoint foi inventado.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Fonte</th><th>Estado</th><th>Como e acessada</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">mock</td>
+              <td>ativa</td>
+              <td>Catalogo local ficticio. Offline, deterministico. Padrao da V1.</td>
+            </tr>
+            <tr>
+              <td class="name">remotive</td>
+              <td>opcional</td>
+              <td><code>GET remotive.com/api/remote-jobs</code> — JSON publico, sem auth. So vagas remotas.</td>
+            </tr>
+            <tr>
+              <td class="name">arbeitnow</td>
+              <td>opcional</td>
+              <td><code>GET arbeitnow.com/api/job-board-api</code> — JSON publico, sem auth. Base majoritariamente europeia.</td>
+            </tr>
+            <tr>
+              <td class="name">linkedin</td>
+              <td>modo manual</td>
+              <td>Sem API publica de busca. Exigiria sessao autenticada.</td>
+            </tr>
+            <tr>
+              <td class="name">indeed</td>
+              <td>modo manual</td>
+              <td>Acesso publico da antiga Publisher API encerrado.</td>
+            </tr>
+            <tr>
+              <td class="name">gupy</td>
+              <td>modo manual</td>
+              <td>Sem API aberta para candidatos — as APIs existentes sao para clientes corporativos.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Declarar uma fonte como indisponivel, em vez de simplesmente omiti-la,
+        deixa explicito <em>por que</em> o LinkedIn nao aparece — e mantem o
+        ponto de extensao pronto caso uma API oficial surja. Para ligar as
+        fontes reais, no <code>.env</code>:
+      </p>
+
+<pre>JOB_SEARCH_ENABLE_NETWORK=<em>true</em>
+JOB_SEARCH_SOURCES=<em>mock,remotive,arbeitnow</em>
+JOB_SEARCH_USER_AGENT=career-agent/1.0 (personal job search; contact: <i>seu-email</i>)</pre>
+
+      <p>
+        Requisicoes saem com timeout, teto de resultados, intervalo minimo entre
+        chamadas e User-Agent identificado. Sem cookies, sem sessao, sem
+        credencial, sem retry agressivo.
+      </p>
+    </section>
+
+    <section id="ferramentas">
+      <h2>Ferramentas MCP</h2>
+
+      <h3>career-agent</h3>
+      <div class="scroller">
+        <table>
+          <tbody>
+            <tr><td class="name">get_candidate_profile</td><td>Le o perfil estruturado. Chame antes de qualquer analise.</td></tr>
+            <tr><td class="name">analyze_job</td><td>Normaliza, pontua e checa o historico de uma vez.</td></tr>
+            <tr><td class="name">calculate_job_match</td><td>So o score 0-100, explicado por dimensao.</td></tr>
+            <tr><td class="name">check_duplicate_application</td><td>Duplicidade por URL, empresa, cargo e similaridade.</td></tr>
+            <tr><td class="name">generate_application</td><td>Monta o pacote completo para revisao. Nao registra nada.</td></tr>
+            <tr><td class="name">register_application</td><td>Grava no historico em <code>pending_approval</code>.</td></tr>
+            <tr><td class="name">list_applications</td><td>Lista com filtros de status, empresa e score.</td></tr>
+            <tr><td class="name">get_application</td><td>Detalhe completo com historico.</td></tr>
+            <tr><td class="name">update_application_status</td><td>Muda status respeitando a maquina de estados.</td></tr>
+            <tr><td class="name">get_safety_policy</td><td>O que o agente nao faz, e por que.</td></tr>
+            <tr><td class="name">get_system_status</td><td>Diagnostico: caminhos, perfil, curriculos, historico.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>job-search</h3>
+      <div class="scroller">
+        <table>
+          <tbody>
+            <tr><td class="name">search_jobs</td><td>Busca nas fontes ativas, deduplica, pontua e ordena.</td></tr>
+            <tr><td class="name">list_job_sources</td><td>Mostra todas as fontes, quais estao ativas e por que.</td></tr>
+            <tr><td class="name">get_manual_search_guide</td><td>Passo a passo do modo manual para portais sem API.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>career-files</h3>
+      <p>
+        Somente leitura, e somente dentro de <code>C:\career-agent\data</code>.
+        O Claude nao ve <code>C:\</code>, nem sua pasta de usuario, nem o codigo
+        do proprio projeto. Bloqueia travessia com <code>..</code>, caminhos
+        absolutos externos, caminhos UNC, symlinks e junctions apontando para
+        fora, nomes de dispositivo reservados do Windows e bytes nulos. So le
+        <code>.md</code>, <code>.markdown</code>, <code>.json</code> e
+        <code>.txt</code>.
+      </p>
+      <div class="scroller">
+        <table>
+          <tbody>
+            <tr><td class="name">read_profile</td><td>Le os tres arquivos de perfil brutos.</td></tr>
+            <tr><td class="name">read_preferences</td><td>Le so <code>preferences.md</code>.</td></tr>
+            <tr><td class="name">list_resumes</td><td>Lista os curriculos disponiveis.</td></tr>
+            <tr><td class="name">read_resume</td><td>Le um curriculo especifico.</td></tr>
+            <tr><td class="name">read_application_history</td><td>Le o espelho JSON do historico.</td></tr>
+            <tr><td class="name">list_data_files</td><td>Lista os arquivos visiveis na raiz de dados.</td></tr>
+            <tr><td class="name">get_sandbox_info</td><td>Mostra exatamente o que este servidor pode acessar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="arquivos">
+      <h2>Arquivos que voce edita</h2>
+      <p>
+        O resto do projeto voce nunca precisa abrir. Estes quatro sao os que
+        importam — procure por <code>[PREENCHER]</code>.
+      </p>
+
+      <div class="scroller">
+        <table>
+          <thead>
+            <tr><th>Arquivo</th><th>O que colocar</th><th>Efeito</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="name">data/profile/<br>profile.md</td>
+              <td>Nome, contatos, resumo, formacao, empresas bloqueadas, anos de experiencia</td>
+              <td>Anos de experiencia ativa metade da dimensao Experiencia</td>
+            </tr>
+            <tr>
+              <td class="name">data/profile/<br>skills.md</td>
+              <td>Tecnologias, arquitetura, dominios</td>
+              <td>Define o que pode ser afirmado como experiencia sua</td>
+            </tr>
+            <tr>
+              <td class="name">data/profile/<br>preferences.md</td>
+              <td>Cargos-alvo, senioridade, modalidade, cidades, salario minimo e alvo</td>
+              <td>Salario ativa a dimensao Salario (15 pontos)</td>
+            </tr>
+            <tr>
+              <td class="name">data/resumes/<br>curriculo-principal.md</td>
+              <td>Suas experiencias profissionais reais</td>
+              <td>Base de toda personalizacao</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        Para varias versoes de curriculo, coloque mais arquivos <code>.md</code>
+        em <code>data/resumes/</code>. O agente escolhe automaticamente aquele
+        cujo nome tem mais palavras em comum com a vaga —
+        <code>curriculo-sap.md</code> vence em vagas SAP,
+        <code>curriculo-backend-dotnet.md</code> em vagas backend.
+      </p>
+    </section>
+
+    <section id="comandos">
+      <h2>Comandos</h2>
+
+      <h3>Instalar</h3>
+<pre>cd C:\career-agent
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1</pre>
+
+      <h3>Configurar o Claude Desktop</h3>
+<pre>powershell -ExecutionPolicy Bypass -File .\scripts\configure-claude-desktop.ps1</pre>
+      <p>
+        Faz backup do arquivo existente com carimbo de data e hora, preserva
+        todas as suas configuracoes e MCPs atuais, e so adiciona ou atualiza as
+        tres entradas do Career Agent.
+      </p>
+
+      <h3>Testar</h3>
+<pre>powershell -ExecutionPolicy Bypass -File .\scripts\test.ps1</pre>
+      <p>
+        Roda os 210 testes pytest e depois as 106 checagens funcionais atraves
+        da camada MCP. Seu perfil real e copiado para uma pasta temporaria — o
+        historico de candidaturas nunca e tocado por um teste.
+      </p>
+
+      <h3>Verificar os servidores</h3>
+<pre>powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1</pre>
+
+      <div class="callout warn">
+        <span class="tag">Reiniciar o Claude Desktop</span>
+        <p>
+          Fechar a janela <strong>nao</strong> encerra o processo, e os MCPs nao
+          recarregam. Clique com o botao direito no icone do Claude na bandeja
+          do sistema — ao lado do relogio — e escolha Sair. So entao abra de
+          novo.
+        </p>
+      </div>
+    </section>
+
+    <section id="usar">
+      <h2>Como usar</h2>
+      <p>Depois de reiniciar, converse normalmente:</p>
+
+<pre><em>Procure vagas Backend .NET compativeis com meu perfil.
+Priorize remoto e hibrido em Goiania.
+Mostre somente vagas com score >= 80.</em>
+
+<em>Analise esta vaga:</em> <i>[cole a URL e a descricao completa]</i>
+
+<em>Prepare minha candidatura para a vaga da Cerrado Software.</em>
+
+<em>Quais candidaturas estao aguardando minha aprovacao?</em>
+
+<em>Aprovo a candidatura app-7973d8d8cb.</em>
+
+<em>Atualize a candidatura app-7973d8d8cb para entrevista.</em></pre>
+
+      <p>
+        Para vagas do LinkedIn, Indeed ou Gupy: abra o portal no navegador,
+        copie a URL e o texto da descricao, e cole no chat com
+        <em>"analise esta vaga"</em>. O agente faz todo o resto.
+      </p>
+
+      <p>
+        Ha um arquivo de instrucoes de comportamento em
+        <code>agent/career-agent.md</code>. Cole o conteudo dele nas Instrucoes
+        de um Projeto do Claude Desktop para que o agente se comporte de forma
+        consistente entre conversas.
+      </p>
+    </section>
+
+    <section id="limitacoes">
+      <h2>Limitacoes e proximos passos</h2>
+
+      <h3>O que ainda nao resolve</h3>
+      <ul class="plain">
+        <li>LinkedIn, Indeed e Gupy funcionam em modo manual. E escolha de seguranca, nao pendencia.</li>
+        <li>Remotive so tem vagas remotas; Arbeitnow e majoritariamente europeu. Sao as APIs publicas legitimas que existem hoje — nao ha equivalente brasileiro aberto.</li>
+        <li>A extracao de requisitos funciona bem com descricoes em bullets; com texto corrido sai menos estruturada.</li>
+        <li>A deteccao de senioridade e por palavra-chave. Titulos ambiguos saem como <code>nao_informado</code> — informe manualmente quando importar.</li>
+        <li>O curriculo personalizado sai em Markdown. Sem exportacao para PDF ou DOCX na V1.</li>
+        <li>Instalacao local e mono-usuario. Sem multi-perfil, sem sincronizacao.</li>
+      </ul>
+
+      <h3>Proximos passos, por relacao valor/esforco</h3>
+      <ul class="plain">
+        <li>Exportar curriculo para PDF e DOCX.</li>
+        <li>Ler descricao de vaga a partir de URL publica sem login, reduzindo o copiar-e-colar.</li>
+        <li>Mapear ATSs brasileiros que exponham endpoint publico de vagas por empresa.</li>
+        <li>Lembretes de follow-up para candidaturas paradas em <code>applied</code>.</li>
+        <li>Metricas do funil: taxa de resposta por score, por stack e por modalidade.</li>
+        <li>Calibrar os pesos com base no que realmente converte, depois de acumular historico.</li>
+        <li>Duplicidade semantica por embeddings, para pegar "Dev Backend .NET" vs "Engenheiro de Software C#".</li>
+      </ul>
+    </section>
+
+    <footer>
+      Career Agent v1.0.0 &middot; C:\career-agent &middot; 64 arquivos versionados em Git<br>
+      210 testes pytest &middot; 106 checagens funcionais via camada MCP &middot; todos passando<br>
+      Documentacao completa em README.md, docs/SECURITY.md, docs/SCORING.md e docs/ARCHITECTURE.md
+    </footer>
+
+  </main>
+</div>
