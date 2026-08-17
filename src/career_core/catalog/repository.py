@@ -236,7 +236,18 @@ class SqliteJobCatalog(IJobCatalog):
             )
 
     def find_duplicate(self, job: CatalogJob) -> CatalogJob | None:
-        """URL identica, ou mesma empresa com titulo praticamente igual."""
+        """Mesma vaga ja no catalogo?
+
+        1. URL normalizada identica -> e a mesma vaga, sem duvida.
+        2. Mesma empresa + titulo praticamente igual -> mesma vaga, MAS so
+           quando as URLs nao contradizem isso.
+
+        A ressalva da regra 2 importa: empresas publicam a mesma funcao em
+        varias cidades (vistos ao vivo no Inter e no C6 Bank, com quatro
+        postagens de titulo identico e URLs distintas). Se duas vagas tem URLs
+        proprias e diferentes, sao postagens diferentes - colapsar apagaria
+        oportunidades reais.
+        """
         normalized_url = normalize_url(job.url)
         company_key = normalize_company(job.company)
         title_key = normalize_title(job.title)
@@ -254,11 +265,18 @@ class SqliteJobCatalog(IJobCatalog):
                 return None
 
             rows = conn.execute(
-                "SELECT payload, normalized_title FROM jobs WHERE normalized_company = ?",
+                """
+                SELECT payload, normalized_title, normalized_url
+                  FROM jobs
+                 WHERE normalized_company = ?
+                """,
                 (company_key,),
             ).fetchall()
 
         for row in rows:
+            # Ambas com URL propria e diferente: postagens distintas.
+            if normalized_url and row["normalized_url"] and normalized_url != row["normalized_url"]:
+                continue
             if similarity(title_key, row["normalized_title"]) >= self.DUPLICATE_TITLE_SIMILARITY:
                 return CatalogJob.model_validate_json(row["payload"])
         return None

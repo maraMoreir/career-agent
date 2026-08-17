@@ -614,6 +614,28 @@ def update_application_status(
 
 @mcp.tool()
 @_guard
+def calculate_match(
+    title: str,
+    description: str = "",
+    company: str = "",
+    location: str = "",
+    work_mode: str = "",
+    seniority: str = "",
+    salary_text: str = "",
+) -> str:
+    """Calcula o score de compatibilidade de uma vaga (0-100), explicado.
+
+    Mesmo comportamento de `calculate_job_match` - este nome mais curto existe
+    porque e o que costuma vir na conversa ("calcule o match dessa vaga").
+    """
+    return calculate_job_match(
+        title=title, description=description, company=company, location=location,
+        work_mode=work_mode, seniority=seniority, salary_text=salary_text,
+    )
+
+
+@mcp.tool()
+@_guard
 def get_safety_policy() -> str:
     """Mostra a politica de seguranca do Career Agent.
 

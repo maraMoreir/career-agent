@@ -8,6 +8,23 @@ legitima, gera mensagens e respostas, e mantem o historico de candidaturas.
 
 ---
 
+## Novidades da v1.1
+
+| Recurso | Como usar |
+|---|---|
+| **Catálogo persistente de vagas** | `run_job_search` coleta e salva; `list_matching_jobs` consulta |
+| **5 provedores de ATS** | Greenhouse, Lever, Ashby, Workable, SmartRecruiters |
+| **Adzuna** (índice nacional BR) | preencha `ADZUNA_APP_ID`/`ADZUNA_APP_KEY` no `.env` |
+| **Pesos configuráveis** | edite `data/config/scoring.json` |
+| **11 dimensões de score** | inclui .NET, SAP, fiscal, arquitetura e foco backend |
+| **Busca agendada** | `.\scripts\schedule.ps1 -IntervalHours 2` |
+| **Dashboard local** | `.\scripts\start-dashboard.ps1` |
+| **Retry com backoff** | automático em todas as fontes HTTP |
+
+Detalhes de cada fonte, com o que foi medido: [docs/FONTES.md](docs/FONTES.md).
+
+---
+
 ## Indice
 
 1. [Arquitetura](#1-arquitetura)

@@ -16,6 +16,10 @@ dev = [
     "pytest>=8.0",
     "pytest-asyncio>=0.23",
 ]
+dashboard = [
+    "fastapi>=0.110",
+    "uvicorn>=0.27",
+]
 
 [build-system]
 requires = ["hatchling"]

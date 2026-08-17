@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -163,12 +164,17 @@ async def main() -> int:
     section("2. FERRAMENTAS REGISTRADAS")
     expected = {
         "career-agent": [
-            "get_candidate_profile", "calculate_job_match", "analyze_job",
-            "generate_application", "register_application", "list_applications",
-            "get_application", "update_application_status",
+            "get_candidate_profile", "calculate_job_match", "calculate_match",
+            "analyze_job", "generate_application", "register_application",
+            "list_applications", "get_application", "update_application_status",
             "check_duplicate_application", "get_safety_policy", "get_system_status",
         ],
-        "job-search": ["search_jobs", "list_job_sources", "get_manual_search_guide"],
+        "job-search": [
+            "search_jobs", "search_jobs_by_source", "run_job_search",
+            "list_matching_jobs", "get_job", "save_job", "update_job_status",
+            "search_companies", "get_search_history", "get_catalog_statistics",
+            "get_scoring_config", "list_job_sources", "get_manual_search_guide",
+        ],
         "career-files": [
             "read_profile", "read_preferences", "list_resumes", "read_resume",
             "read_application_history", "list_data_files", "get_sandbox_info",
@@ -249,8 +255,9 @@ async def main() -> int:
     }
     score_text = await _call(career, "calculate_job_match", job)
     check("score calculado", "Score:" in score_text)
-    for label in ("Stack tecnica:", "Senioridade:", "Salario:", "Modalidade:",
-                  "Localizacao:", "Experiencia:", "Empresa:", "Recomendacao:"):
+    for label in ("Stack tecnica:", "Experiencia .NET:", "Senioridade:", "Foco backend:",
+                  "Arquitetura:", "Salario:", "Modalidade:", "Localizacao:",
+                  "Experiencia SAP:", "Experiencia fiscal:", "Empresa:", "Recomendacao:"):
         check(f"score detalha '{label}'", label in score_text)
     check("aponta Azure como gap", "azure" in score_text.lower())
 
@@ -340,7 +347,50 @@ async def main() -> int:
     check("espelho JSON atualizado", application_id in history_file)
     check("espelho avisa que e derivado", "GERADO AUTOMATICAMENTE" in history_file)
 
-    section("13. SEGURANCA")
+    section("13. CATALOGO E PIPELINE")
+    run = await _call(search, "run_job_search", {"keywords": "backend .net", "min_score": 70})
+    check("pipeline executa e salva", "PIPELINE DE BUSCA" in run, run[:160])
+    check("execucao registra contagens", "Vagas coletadas:" in run)
+
+    run_again = await _call(search, "run_job_search", {"keywords": "backend .net", "min_score": 70})
+    check("segunda execucao deduplica", "Ja conhecidas..: " in run_again)
+
+    listing_jobs = await _call(search, "list_matching_jobs", {"min_score": 70})
+    check("catalogo lista as vagas", "no catalogo" in listing_jobs, listing_jobs[:160])
+
+    match = re.search(r"\bjob-[0-9a-f]{12}\b", listing_jobs)
+    job_id = match.group(0) if match else ""
+    check("id de vaga devolvido", bool(job_id), listing_jobs[:160])
+
+    if job_id:
+        detail = await _call(search, "get_job", {"job_id": job_id})
+        check("detalhe da vaga traz o score", "Score:" in detail)
+        moved = await _call(search, "update_job_status", {"job_id": job_id, "status": "Interested"})
+        check("status da vaga muda", "Interested" in moved)
+
+    saved = await _call(
+        search, "save_job",
+        {"title": "Dev Backend .NET Senior", "company": "Manual Ltda",
+         "url": "https://exemplo-manual.dev/v/1",
+         "description": "Requisitos: C#, .NET, ASP.NET Core, PostgreSQL."},
+    )
+    check("vaga manual e salva", "VAGA SALVA" in saved, saved[:160])
+
+    companies = await _call(search, "search_companies", {})
+    check("empresas agregadas", "empresa(s)" in companies)
+
+    history = await _call(search, "get_search_history", {})
+    check("historico de buscas", "execucao(oes)" in history)
+
+    stats = await _call(search, "get_catalog_statistics", {})
+    check("estatisticas do catalogo", "ESTATISTICAS DO CATALOGO" in stats)
+    check("estatisticas listam tecnologias", "Tecnologias mais exigidas" in stats)
+
+    scoring = await _call(search, "get_scoring_config", {})
+    check("configuracao de score exposta", "PESOS" in scoring)
+    check("faixas da spec presentes", "Excelente" in scoring and "Muito boa" in scoring)
+
+    section("14. SEGURANCA")
     policy = await _call(career, "get_safety_policy", {})
     for marker in ("Nao faz login automatico", "Nao armazena senha",
                    "Nao envia candidatura automaticamente", "Nao faz scraping agressivo"):
