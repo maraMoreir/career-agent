@@ -102,6 +102,7 @@ class Settings:
     applications_dir: Path = field(init=False)
     database_path: Path = field(init=False)
     json_mirror_path: Path = field(init=False)
+    catalog_path: Path = field(init=False)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "profile_dir", self.data_root / "profile")
@@ -115,6 +116,8 @@ class Settings:
             "json_mirror_path",
             self.data_root / "applications" / "applications.json",
         )
+        # Banco separado: vagas sao recoletaveis, candidaturas nao.
+        object.__setattr__(self, "catalog_path", self.data_root / "catalog" / "catalog.db")
 
     def ensure_directories(self) -> None:
         """Cria a arvore de diretorios necessaria (idempotente)."""
@@ -123,6 +126,7 @@ class Settings:
             self.profile_dir,
             self.resumes_dir,
             self.applications_dir,
+            self.catalog_path.parent,
             self.log_dir,
         ):
             directory.mkdir(parents=True, exist_ok=True)

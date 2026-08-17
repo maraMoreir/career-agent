@@ -13,7 +13,9 @@ from functools import cached_property
 from .applications.builder import ApplicationBuilder
 from .applications.dedupe import DuplicateDetector
 from .applications.repository import IApplicationRepository, SqliteApplicationRepository
+from .catalog.repository import IJobCatalog, SqliteJobCatalog
 from .config import Settings, get_settings
+from .pipeline import JobSearchPipeline
 from .job_sources.registry import AggregatedJobSearch, JobSourceRegistry
 from .models import CandidateProfile
 from .profile.repository import IProfileRepository, MarkdownProfileRepository
@@ -33,11 +35,13 @@ class CareerServices:
         settings: Settings | None = None,
         profile_repository: IProfileRepository | None = None,
         application_repository: IApplicationRepository | None = None,
+        catalog: IJobCatalog | None = None,
     ) -> None:
         self.settings = settings or get_settings()
         self.settings.ensure_directories()
         self._profile_repository = profile_repository
         self._application_repository = application_repository
+        self._catalog = catalog
 
     # -- infraestrutura ----------------------------------------------------
 
@@ -62,6 +66,19 @@ class CareerServices:
     @cached_property
     def filesystem(self) -> SandboxedFileSystem:
         return SandboxedFileSystem(self.settings.data_root)
+
+    @cached_property
+    def catalog(self) -> IJobCatalog:
+        return self._catalog or SqliteJobCatalog(self.settings.catalog_path)
+
+    @cached_property
+    def pipeline(self) -> JobSearchPipeline:
+        return JobSearchPipeline(
+            job_search=self.job_search,
+            scorer=self.scorer,
+            catalog=self.catalog,
+            minimum_score=float(self.settings.min_score),
+        )
 
     # -- dominio -----------------------------------------------------------
 
