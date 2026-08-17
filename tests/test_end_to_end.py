@@ -40,7 +40,7 @@ def test_fluxo_completo(services, settings):
 
     assert score.total >= 80
     assert score.recommendation in (Recommendation.HIGH_PRIORITY, Recommendation.PRIORITY)
-    assert len(score.dimensions) == 7
+    assert len(score.dimensions) == 11
     assert score.explanation.startswith("Score: ")
 
     # Vagas junior precisam ter sido descartadas.

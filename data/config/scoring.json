@@ -1,0 +1,39 @@
+{
+  "_comment": "Pesos e faixas do score. Os pesos devem somar 100 (se nao somarem, o score e normalizado). Edite e reinicie o Claude Desktop.",
+  "weights": {
+    "stack": 20.0,
+    "dotnet": 14.0,
+    "seniority": 14.0,
+    "backend": 8.0,
+    "architecture": 8.0,
+    "salary": 10.0,
+    "location": 7.0,
+    "work_mode": 7.0,
+    "sap": 5.0,
+    "fiscal": 4.0,
+    "company": 3.0
+  },
+  "bands": [
+    {
+      "min": 90.0,
+      "label": "Excelente"
+    },
+    {
+      "min": 75.0,
+      "label": "Muito boa"
+    },
+    {
+      "min": 60.0,
+      "label": "Boa"
+    },
+    {
+      "min": 40.0,
+      "label": "Baixa"
+    },
+    {
+      "min": 0.0,
+      "label": "Nao prioritaria"
+    }
+  ],
+  "minimum_score": 75.0
+}

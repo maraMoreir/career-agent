@@ -22,28 +22,32 @@ from .dimensions import IScoreDimension, default_dimensions
 
 logger = logging.getLogger(__name__)
 
-#: Faixas de classificacao (limite inferior inclusivo).
-THRESHOLDS: tuple[tuple[float, Recommendation], ...] = (
-    (90.0, Recommendation.HIGH_PRIORITY),
-    (80.0, Recommendation.PRIORITY),
-    (70.0, Recommendation.ANALYZE),
-    (0.0, Recommendation.DISCARD),
-)
+def classify(total: float, config=None) -> Recommendation:
+    """Converte um total 0-100 em recomendacao, segundo as faixas configuradas.
 
+    Faixas padrao (especificacao):
+        90-100 Excelente | 75-89 Muito boa | 60-74 Boa
+        40-59 Baixa      |  0-39 Nao prioritaria
+    """
+    from .config import ScoringConfig
 
-def classify(total: float) -> Recommendation:
-    """Converte um total 0-100 em recomendacao."""
-    for threshold, recommendation in THRESHOLDS:
-        if total >= threshold:
-            return recommendation
-    return Recommendation.DISCARD
+    return (config or ScoringConfig()).recommendation(total)
 
 
 class JobScorer:
     """Calcula o score de compatibilidade de uma vaga com o perfil."""
 
-    def __init__(self, dimensions: list[IScoreDimension] | None = None) -> None:
-        self._dimensions = dimensions if dimensions is not None else default_dimensions()
+    def __init__(
+        self,
+        dimensions: list[IScoreDimension] | None = None,
+        config: "ScoringConfig | None" = None,
+    ) -> None:
+        from .config import ScoringConfig
+
+        self._config = config or ScoringConfig()
+        self._dimensions = (
+            dimensions if dimensions is not None else default_dimensions(self._config)
+        )
         total_weight = sum(d.max_points for d in self._dimensions)
         if abs(total_weight - 100.0) > 0.01:
             logger.warning(
@@ -82,7 +86,9 @@ class JobScorer:
             total = min(total, 69.0)
 
         recommendation = (
-            Recommendation.DISCARD if eliminations else classify(total)
+            Recommendation.DISCARD
+            if eliminations
+            else self._config.recommendation(total)
         )
 
         gaps = _dedupe([g for r in results for g in r.gaps])
@@ -98,8 +104,12 @@ class JobScorer:
             eliminated=bool(eliminations),
             elimination_reasons=eliminations,
         )
-        score.explanation = render_explanation(job, score)
+        score.explanation = render_explanation(job, score, self._config)
         return score
+
+    @property
+    def config(self):
+        return self._config
 
     # -- eliminacao --------------------------------------------------------
 
@@ -136,9 +146,10 @@ def _dedupe(values: list[str]) -> list[str]:
     return result
 
 
-def render_explanation(job: Job, score: JobScore) -> str:
+def render_explanation(job: Job, score: JobScore, config=None) -> str:
     """Renderiza o score no formato legivel pedido pela usuaria."""
-    lines: list[str] = [f"Score: {score.total:g}/100", ""]
+    band = f" - {config.classify(score.total)}" if config else ""
+    lines: list[str] = [f"Score: {score.total:g}/100{band}", ""]
 
     for dimension in score.dimensions:
         lines.append(f"{dimension.label}: {dimension.points:g}/{dimension.max_points:g}")

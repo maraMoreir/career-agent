@@ -532,14 +532,41 @@ class CompanyDimension(IScoreDimension):
 # ---------------------------------------------------------------------------
 
 
-def default_dimensions() -> list[IScoreDimension]:
-    """Conjunto padrao de dimensoes, somando exatamente 100 pontos."""
-    return [
+def default_dimensions(config=None) -> list[IScoreDimension]:
+    """Conjunto padrao de dimensoes, com os pesos vindos da configuracao.
+
+    `max_points` e atributo de classe; atribuir na instancia o sobrescreve
+    apenas para aquele objeto. E o que permite reconfigurar o peso sem
+    subclasse e sem estado global.
+    """
+    from .config import ScoringConfig
+    from .specialized import (
+        ArchitectureDimension,
+        BackendFocusDimension,
+        DotNetExperienceDimension,
+        FiscalExperienceDimension,
+        SapExperienceDimension,
+    )
+
+    resolved = config or ScoringConfig()
+
+    dimensions: list[IScoreDimension] = [
         StackDimension(),
+        DotNetExperienceDimension(),
         SeniorityDimension(),
+        BackendFocusDimension(),
+        ArchitectureDimension(),
         SalaryDimension(),
-        WorkModeDimension(),
         LocationDimension(),
-        ExperienceDimension(),
+        WorkModeDimension(),
+        SapExperienceDimension(),
+        FiscalExperienceDimension(),
         CompanyDimension(),
     ]
+
+    for dimension in dimensions:
+        weight = resolved.weights.get(dimension.key)
+        if weight is not None:
+            dimension.max_points = float(weight)
+
+    return dimensions

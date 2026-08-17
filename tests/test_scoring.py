@@ -18,35 +18,77 @@ def test_pesos_somam_exatamente_100():
     assert sum(d.max_points for d in default_dimensions()) == pytest.approx(100.0)
 
 
-def test_pesos_conferem_com_a_especificacao():
+def test_pesos_vem_da_configuracao():
+    from career_core.scoring.config import DEFAULT_WEIGHTS
+
     weights = {d.key: d.max_points for d in default_dimensions()}
-    assert weights == {
-        "stack": 30.0,
-        "seniority": 20.0,
-        "salary": 15.0,
-        "work_mode": 10.0,
-        "location": 10.0,
-        "experience": 10.0,
-        "company": 5.0,
-    }
+    assert weights == DEFAULT_WEIGHTS
+
+
+def test_dimensoes_cobrem_os_fatores_da_especificacao():
+    """Tecnologias, senioridade, localizacao, modalidade, salario, .NET,
+    SAP, fiscal, arquitetura e backend."""
+    keys = {d.key for d in default_dimensions()}
+    for required in (
+        "stack", "seniority", "location", "work_mode", "salary",
+        "dotnet", "sap", "fiscal", "architecture", "backend", "company",
+    ):
+        assert required in keys, f"dimensao ausente: {required}"
+
+
+def test_pesos_configurados_sobrescrevem_o_padrao():
+    from career_core.scoring.config import ScoringConfig
+
+    config = ScoringConfig(weights={"stack": 50.0, "dotnet": 50.0})
+    weights = {d.key: d.max_points for d in default_dimensions(config)}
+    assert weights["stack"] == 50.0
+    assert weights["dotnet"] == 50.0
+
+
+@pytest.mark.parametrize(
+    ("total", "expected"),
+    [
+        (100.0, "Excelente"),
+        (90.0, "Excelente"),
+        (89.9, "Muito boa"),
+        (75.0, "Muito boa"),
+        (74.9, "Boa"),
+        (60.0, "Boa"),
+        (59.9, "Baixa"),
+        (40.0, "Baixa"),
+        (39.9, "Nao prioritaria"),
+        (0.0, "Nao prioritaria"),
+    ],
+)
+def test_faixas_da_especificacao(total, expected):
+    from career_core.scoring.config import ScoringConfig
+
+    assert ScoringConfig().classify(total) == expected
 
 
 @pytest.mark.parametrize(
     ("total", "expected"),
     [
         (100.0, Recommendation.HIGH_PRIORITY),
-        (94.0, Recommendation.HIGH_PRIORITY),
         (90.0, Recommendation.HIGH_PRIORITY),
         (89.9, Recommendation.PRIORITY),
-        (80.0, Recommendation.PRIORITY),
-        (79.9, Recommendation.ANALYZE),
-        (70.0, Recommendation.ANALYZE),
-        (69.9, Recommendation.DISCARD),
+        (75.0, Recommendation.PRIORITY),
+        (74.9, Recommendation.ANALYZE),
+        (60.0, Recommendation.ANALYZE),
+        (59.9, Recommendation.DISCARD),
         (0.0, Recommendation.DISCARD),
     ],
 )
 def test_faixas_de_classificacao(total, expected):
     assert classify(total) is expected
+
+
+def test_faixas_configuradas_sao_respeitadas():
+    from career_core.scoring.config import ScoringConfig
+
+    config = ScoringConfig(bands=[(50.0, "Otima"), (0.0, "Ruim")])
+    assert config.classify(80.0) == "Otima"
+    assert config.classify(20.0) == "Ruim"
 
 
 # ---------------------------------------------------------------------------
@@ -69,7 +111,7 @@ def test_score_fica_entre_0_e_100(services, profile, perfect_job, junior_job):
 
 def test_toda_dimensao_traz_justificativa(services, profile, perfect_job):
     score = services.scorer.score(perfect_job, profile)
-    assert len(score.dimensions) == 7
+    assert len(score.dimensions) == len(default_dimensions())
     for dimension in score.dimensions:
         assert dimension.rationale.strip(), f"{dimension.key} sem justificativa"
         assert 0.0 <= dimension.points <= dimension.max_points
@@ -80,11 +122,15 @@ def test_explicacao_tem_o_formato_pedido(services, profile, perfect_job):
     assert text.startswith("Score: ")
     for label in (
         "Stack tecnica:",
+        "Experiencia .NET:",
         "Senioridade:",
+        "Foco backend:",
+        "Arquitetura:",
         "Salario:",
         "Modalidade:",
         "Localizacao:",
-        "Experiencia:",
+        "Experiencia SAP:",
+        "Experiencia fiscal:",
         "Empresa:",
         "Gaps:",
         "Recomendacao:",
@@ -135,13 +181,19 @@ def _points(score, key: str) -> float:
     return next(d.points for d in score.dimensions if d.key == key)
 
 
+def _max(score, key: str) -> float:
+    return next(d.max_points for d in score.dimensions if d.key == key)
+
+
 def test_senioridade_alvo_recebe_nota_cheia(services, profile, perfect_job):
-    assert _points(services.scorer.score(perfect_job, profile), "seniority") == 20.0
+    score = services.scorer.score(perfect_job, profile)
+    assert _points(score, "seniority") == _max(score, "seniority")
 
 
 def test_senioridade_nao_informada_fica_neutra(services, profile, perfect_job):
     job = perfect_job.model_copy(update={"seniority": Seniority.UNKNOWN})
-    assert _points(services.scorer.score(job, profile), "seniority") == pytest.approx(12.0)
+    score = services.scorer.score(job, profile)
+    assert _points(score, "seniority") == pytest.approx(_max(score, "seniority") * 0.6)
 
 
 def test_remoto_vence_hibrido_que_vence_presencial(services, profile, perfect_job):
@@ -151,11 +203,13 @@ def test_remoto_vence_hibrido_que_vence_presencial(services, profile, perfect_jo
 
     assert mode_points(WorkMode.REMOTE) > mode_points(WorkMode.HYBRID)
     assert mode_points(WorkMode.HYBRID) > mode_points(WorkMode.ONSITE)
-    assert mode_points(WorkMode.REMOTE) == 10.0
+    score = services.scorer.score(perfect_job, profile)
+    assert mode_points(WorkMode.REMOTE) == _max(score, "work_mode")
 
 
 def test_salario_acima_do_alvo_recebe_nota_cheia(services, profile, perfect_job):
-    assert _points(services.scorer.score(perfect_job, profile), "salary") == 15.0
+    score = services.scorer.score(perfect_job, profile)
+    assert _points(score, "salary") == _max(score, "salary")
 
 
 def test_salario_abaixo_do_minimo_penaliza(services, profile, perfect_job):
@@ -163,7 +217,7 @@ def test_salario_abaixo_do_minimo_penaliza(services, profile, perfect_job):
         update={"salary_min_brl": 6000.0, "salary_max_brl": 6000.0, "salary_text": "R$ 6.000"}
     )
     score = services.scorer.score(job, profile)
-    assert _points(score, "salary") < 7.5
+    assert _points(score, "salary") < _max(score, "salary") * 0.5
     assert any("minimo" in gap.lower() for gap in score.gaps)
 
 
@@ -172,7 +226,7 @@ def test_salario_nao_divulgado_fica_neutro_e_vira_gap(services, profile, perfect
         update={"salary_min_brl": None, "salary_max_brl": None, "salary_text": ""}
     )
     score = services.scorer.score(job, profile)
-    assert _points(score, "salary") == pytest.approx(9.0)
+    assert _points(score, "salary") == pytest.approx(_max(score, "salary") * 0.6)
     assert any("salarial" in gap.lower() for gap in score.gaps)
 
 
@@ -191,7 +245,8 @@ def test_hibrido_na_cidade_preferida_pontua_cheio(services, profile, perfect_job
     job = perfect_job.model_copy(
         update={"work_mode": WorkMode.HYBRID, "location": "Goiania, GO", "country": "Brasil"}
     )
-    assert _points(services.scorer.score(job, profile), "location") == 10.0
+    score = services.scorer.score(job, profile)
+    assert _points(score, "location") == _max(score, "location")
 
 
 def test_stack_fora_do_foco_perde_pontos(services, profile):
@@ -206,7 +261,9 @@ def test_stack_fora_do_foco_perde_pontos(services, profile):
         description="Requirements:\n- Go\n- Kafka\n- Kubernetes",
     )
     score = services.scorer.score(job, profile)
-    assert _points(score, "stack") < 15.0
+    assert _points(score, "stack") < _max(score, "stack") * 0.5
+    # Sem .NET/C#, a dimensao nuclear quase zera.
+    assert _points(score, "dotnet") <= _max(score, "dotnet") * 0.15
     assert score.recommendation is Recommendation.DISCARD
 
 
@@ -227,7 +284,7 @@ def test_vaga_sem_descricao_nao_quebra(services, profile):
     job = Job(source="test", title="Pessoa Desenvolvedora")
     score = services.scorer.score(job, profile)
     assert 0.0 <= score.total <= 100.0
-    assert len(score.dimensions) == 7
+    assert len(score.dimensions) == len(default_dimensions())
 
 
 def test_dimensao_que_falha_nao_derruba_o_score(profile, perfect_job):

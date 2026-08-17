@@ -21,6 +21,7 @@ from .models import CandidateProfile
 from .profile.repository import IProfileRepository, MarkdownProfileRepository
 from .paths import SandboxedFileSystem
 from .resume.tailor import ResumeTailor
+from .scoring.config import ScoringConfig, default_config_path, load_scoring_config
 from .scoring.scorer import JobScorer
 from .security import ApprovalGate
 
@@ -83,8 +84,12 @@ class CareerServices:
     # -- dominio -----------------------------------------------------------
 
     @cached_property
+    def scoring_config(self) -> ScoringConfig:
+        return load_scoring_config(default_config_path(self.settings.data_root))
+
+    @cached_property
     def scorer(self) -> JobScorer:
-        return JobScorer()
+        return JobScorer(config=self.scoring_config)
 
     @cached_property
     def duplicates(self) -> DuplicateDetector:
