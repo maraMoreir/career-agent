@@ -1,0 +1,61 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Dashboard (http://127.0.0.1:8787)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["dashboard.app:app", "--host", "127.0.0.1", "--port", "8787", "--reload"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Busca de vagas (pipeline)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/run_search.py",
+      "args": ["--keywords", "backend .net c#", "--min-score", "75"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "Validar os 3 MCPs",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/scripts/validate_mcp.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "MCP career-agent (stdio)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-career/server.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "MCP job-search (stdio)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-job-search/server.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+    {
+      "name": "MCP career-files (stdio)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/mcp-career-files/server.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
+  ]
+}

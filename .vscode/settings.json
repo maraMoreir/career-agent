@@ -1,0 +1,44 @@
+{
+  // Interpretador do ambiente virtual do projeto. Sem isto, o VS Code usa o
+  // Python global e marca `import career_core` como nao resolvido.
+  "python.defaultInterpreterPath": "${workspaceFolder}\\.venv\\Scripts\\python.exe",
+
+  // O codigo vive em src/ (layout src). Sem este caminho extra, o Pylance
+  // nao encontra o pacote e sublinha todos os imports de dominio.
+  "python.analysis.extraPaths": ["${workspaceFolder}/src"],
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.typeCheckingMode": "basic",
+
+  // Testes
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestArgs": ["tests"],
+
+  // Terminal ja entra com o venv ativo
+  "python.terminal.activateEnvironment": true,
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true,
+    "**/*.egg-info": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/data/catalog": true,
+    "**/logs": true
+  },
+
+  "[python]": {
+    "editor.rulers": [88],
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+  "[powershell]": {
+    "editor.tabSize": 4
+  },
+
+  "files.encoding": "utf8",
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true
+}
