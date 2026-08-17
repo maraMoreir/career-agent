@@ -67,7 +67,11 @@ class IJobSource(ABC):
 
 
 class RateLimiter:
-    """Espacamento minimo entre requisicoes. Evita ser um mau cidadao."""
+    """Espacamento minimo entre requisicoes a uma unica fonte.
+
+    Mantido para fontes simples. Para limitar POR HOST com retry e backoff,
+    use `career_core.http.HttpClient`.
+    """
 
     def __init__(self, min_interval_seconds: float) -> None:
         self._interval = max(0.0, min_interval_seconds)
@@ -102,10 +106,22 @@ _SENIORITY_PATTERNS: tuple[tuple[Seniority, tuple[str, ...]], ...] = (
     (Seniority.MID, ("pleno", " pl ", "mid level", "mid-level", "middle", " ii")),
 )
 
+# Raizes, nao palavras inteiras: portugues flexiona em genero e numero
+# ("vaga remota", "vagas remotas", "trabalho remoto", "atuacao hibrida").
+# Casar so a forma masculina singular perdia metade das vagas brasileiras.
 _WORK_MODE_PATTERNS: tuple[tuple[WorkMode, tuple[str, ...]], ...] = (
-    (WorkMode.REMOTE, ("remoto", "remote", "home office", "anywhere", "100% remoto", "teletrabalho")),
-    (WorkMode.HYBRID, ("hibrido", "hybrid", "semi presencial", "semipresencial")),
-    (WorkMode.ONSITE, ("presencial", "on-site", "onsite", "no escritorio", "in office")),
+    (
+        WorkMode.REMOTE,
+        ("remot", "remote", "home office", "anywhere", "teletrabalho", "100% remo"),
+    ),
+    (
+        WorkMode.HYBRID,
+        ("hibrid", "hybrid", "semi presencia", "semipresencia"),
+    ),
+    (
+        WorkMode.ONSITE,
+        ("presencia", "on-site", "onsite", "no escritorio", "in office"),
+    ),
 )
 
 _SALARY = re.compile(

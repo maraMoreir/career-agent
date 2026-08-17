@@ -877,9 +877,9 @@ Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
     <section id="fontes">
       <h2>Fontes de vagas</h2>
       <p>
-        Todas atras da interface <code>IJobSource</code>. Os dois endpoints HTTP
-        foram verificados contra a resposta real antes de escrever o parser —
-        nenhum endpoint foi inventado.
+        Todas atras da interface <code>IJobSource</code>. Todo endpoint foi
+        verificado contra a resposta real antes de escrever o parser — nenhum
+        endpoint foi inventado.
       </p>
 
       <div class="scroller">
@@ -889,9 +889,18 @@ Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
           </thead>
           <tbody>
             <tr>
+              <td class="name">ats</td>
+              <td><strong>padrao</strong></td>
+              <td>
+                Quadros de vagas publicos das proprias empresas, via Greenhouse,
+                Lever e Ashby. <strong>Melhor cobertura de vagas .NET no
+                Brasil.</strong> Sem autenticacao, sem cookies, sem scraping.
+              </td>
+            </tr>
+            <tr>
               <td class="name">mock</td>
-              <td>ativa</td>
-              <td>Catalogo local ficticio. Offline, deterministico. Padrao da V1.</td>
+              <td>disponivel</td>
+              <td>Catalogo local ficticio. Offline, deterministico. Para demonstracao e testes.</td>
             </tr>
             <tr>
               <td class="name">remotive</td>
@@ -930,39 +939,71 @@ Este bloqueio e a garantia de que nada sai daqui sem voce ter visto.</pre>
         </table>
       </div>
 
+      <h3>A fonte <code>ats</code> — a que realmente funciona</h3>
+
+      <p>
+        Greenhouse, Lever e Ashby publicam a lista de vagas de cada empresa num
+        endpoint JSON publico e sem autenticacao. E a mesma resposta que
+        alimenta a pagina de carreiras que qualquer pessoa abre no navegador —
+        nao ha login, cookie, scraping de HTML nem anti-bot para contornar.
+      </p>
+
+<pre>Greenhouse : GET boards-api.greenhouse.io/v1/boards/<i>{slug}</i>/jobs?content=true
+Lever      : GET api.lever.co/v0/postings/<i>{slug}</i>?mode=json
+Ashby      : GET api.ashbyhq.com/posting-api/job-board/<i>{slug}</i></pre>
+
+      <p>
+        Verificado ao vivo em 10 empresas brasileiras: <strong>1.163 vagas
+        varridas</strong>, com vagas .NET reais entre os primeiros resultados.
+      </p>
+
+      <div class="readout">
+        <div class="verdict">
+          <div class="score">90,6<span>/100</span></div>
+          <span class="pill">Prioridade alta</span>
+          <p style="font-size:13.5px;margin-top:14px">
+            Senior Software Engineer, Cloud &middot; VTEX &middot; remoto, Brasil
+          </p>
+        </div>
+        <div class="verdict">
+          <div class="score">85<span>/100</span></div>
+          <span class="pill">Prioridade</span>
+          <p style="font-size:13.5px;margin-top:14px">
+            .NET Senior Software Engineer &middot; Stone &middot; remoto
+          </p>
+        </div>
+      </div>
+
+      <p>
+        Configure quais empresas entram na busca. Para descobrir o
+        identificador, abra a pagina de carreiras da empresa e olhe a URL:
+        <code>job-boards.greenhouse.io/X</code> vira <code>greenhouse:X</code>,
+        <code>jobs.lever.co/X</code> vira <code>lever:X</code>,
+        <code>jobs.ashbyhq.com/X</code> vira <code>ashby:X</code>.
+      </p>
+
+<pre>JOB_SEARCH_ENABLE_NETWORK=<em>true</em>
+JOB_SEARCH_SOURCES=<em>ats</em>
+JOB_SEARCH_ATS_COMPANIES=<em>greenhouse:stone,ashby:nubank,greenhouse:vtex,lever:neon</em>
+JOB_SEARCH_USER_AGENT=career-agent/1.0 (personal job search; contact: <i>seu-email</i>)</pre>
+
       <div class="callout warn">
-        <span class="tag">Medido em agosto de 2026, nao estimado</span>
+        <span class="tag">Remotive e Arbeitnow — medido, nao estimado</span>
         <p>
-          <strong>A busca automatica praticamente nao serve para vagas .NET no
-          Brasil.</strong> A Remotive devolve as mesmas 14 vagas para
-          <code>.net</code>, <code>python</code> ou uma consulta sem sentido —
-          o parametro de busca e inerte, e o feed nao tem nenhuma vaga de
-          engenharia .NET. O Arbeitnow tem 175 vagas, todas europeias e
-          presenciais, nenhuma com .NET ou C#.
-        </p>
-        <p>
-          Isso nao se resolve mudando os termos de busca. Nao existe API
-          publica com boa cobertura do mercado brasileiro. <strong>Use o modo
-          manual</strong> — e onde o sistema entrega valor de verdade: a busca
-          e a parte fraca, a analise e a parte forte.
+          A Remotive devolve as mesmas 14 vagas para <code>.net</code>,
+          <code>python</code> ou uma consulta sem sentido: o parametro de busca
+          e inerte e o feed nao tem nenhuma vaga de engenharia .NET. O
+          Arbeitnow tem 175 vagas, quase todas europeias e presenciais,
+          nenhuma com .NET ou C#. Continuam disponiveis, mas fora do padrao.
         </p>
       </div>
 
       <p>
         Declarar uma fonte como indisponivel, em vez de simplesmente omiti-la,
         deixa explicito <em>por que</em> o LinkedIn nao aparece — e mantem o
-        ponto de extensao pronto caso uma API oficial surja. Para ligar as
-        fontes reais, no <code>.env</code>:
-      </p>
-
-<pre>JOB_SEARCH_ENABLE_NETWORK=<em>true</em>
-JOB_SEARCH_SOURCES=<em>mock,remotive,arbeitnow</em>
-JOB_SEARCH_USER_AGENT=career-agent/1.0 (personal job search; contact: <i>seu-email</i>)</pre>
-
-      <p>
-        Requisicoes saem com timeout, teto de resultados, intervalo minimo entre
-        chamadas e User-Agent identificado. Sem cookies, sem sessao, sem
-        credencial, sem retry agressivo.
+        ponto de extensao pronto caso uma API oficial surja. Requisicoes saem
+        com timeout, teto de resultados e User-Agent identificado. Sem cookies,
+        sem sessao, sem credencial, sem retry agressivo.
       </p>
     </section>
 

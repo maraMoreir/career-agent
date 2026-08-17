@@ -90,6 +90,11 @@ class Settings:
     user_agent: str
     #: Quadros de ATS a consultar, no formato `provedor:empresa`.
     ats_companies: tuple[str, ...]
+    #: Tentativas por requisicao HTTP (1 = sem retry).
+    http_max_attempts: int = 3
+    #: Credenciais opcionais da Adzuna (unica fonte com indice nacional BR).
+    adzuna_app_id: str = ""
+    adzuna_app_key: str = ""
 
     # Derivados -------------------------------------------------------
     profile_dir: Path = field(init=False)
@@ -145,6 +150,9 @@ def build_settings() -> Settings:
         user_agent=os.getenv("JOB_SEARCH_USER_AGENT")
         or "career-agent/1.0 (personal job search)",
         ats_companies=_get_csv("JOB_SEARCH_ATS_COMPANIES", _default_ats_companies()),
+        http_max_attempts=_get_int("JOB_SEARCH_MAX_ATTEMPTS", 3),
+        adzuna_app_id=(os.getenv("ADZUNA_APP_ID") or "").strip(),
+        adzuna_app_key=(os.getenv("ADZUNA_APP_KEY") or "").strip(),
     )
 
 

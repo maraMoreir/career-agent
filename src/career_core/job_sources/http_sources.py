@@ -25,12 +25,12 @@ import logging
 from typing import Any
 
 from ..errors import JobSourceError
+from ..http import HostRateLimiter, HttpClient
 from ..models import Job, WorkMode
 from ..text import normalize_text
 from .base import (
     IJobSource,
     JobQuery,
-    RateLimiter,
     SourceResult,
     detect_seniority,
     detect_work_mode,
@@ -42,7 +42,7 @@ logger = logging.getLogger(__name__)
 
 
 class _HttpJobSource(IJobSource):
-    """Base com HTTP educado: timeout, rate limit e User-Agent honesto."""
+    """Base com HTTP educado: retry com backoff, rate limit por host e UA honesto."""
 
     endpoint: str = ""
 
@@ -52,32 +52,20 @@ class _HttpJobSource(IJobSource):
         timeout: float = 15.0,
         min_interval: float = 2.0,
         max_results: int = 25,
+        http_client: HttpClient | None = None,
     ) -> None:
-        self._user_agent = user_agent
-        self._timeout = timeout
         self._max_results = max_results
-        self._limiter = RateLimiter(min_interval)
+        self._http = http_client or HttpClient(
+            user_agent=user_agent,
+            timeout=timeout,
+            limiter=HostRateLimiter(min_interval),
+        )
 
     def _fetch(self, params: dict[str, Any]) -> dict[str, Any]:
         try:
-            import httpx
-        except ImportError as exc:  # pragma: no cover
-            raise JobSourceError(
-                "httpx nao instalado. Rode scripts/install.ps1."
-            ) from exc
-
-        self._limiter.wait()
-        headers = {"User-Agent": self._user_agent, "Accept": "application/json"}
-
-        try:
-            with httpx.Client(timeout=self._timeout, follow_redirects=True) as client:
-                response = client.get(self.endpoint, params=params, headers=headers)
-                response.raise_for_status()
-                return response.json()
-        except Exception as exc:
-            raise JobSourceError(
-                f"Falha ao consultar {self.name} ({self.endpoint}): {exc}"
-            ) from exc
+            return self._http.get_json(self.endpoint, params=params)
+        except JobSourceError as exc:
+            raise JobSourceError(f"Falha ao consultar {self.name}: {exc}") from exc
 
     @staticmethod
     def _matches_location(job: Job, wanted: str) -> bool:

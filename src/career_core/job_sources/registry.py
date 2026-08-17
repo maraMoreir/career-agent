@@ -12,6 +12,7 @@ from collections.abc import Callable
 from ..config import Settings
 from ..models import Job
 from ..text import normalize_company, normalize_title, normalize_url, similarity
+from .aggregators import AdzunaJobSource, jooble_source
 from .ats_boards import AtsBoardsJobSource
 from .base import IJobSource, JobQuery, SourceResult
 from .http_sources import ArbeitnowJobSource, RemotiveJobSource
@@ -51,9 +52,21 @@ _FACTORIES: dict[str, tuple[Callable[[Settings], IJobSource], bool]] = {
         ),
         True,
     ),
+    "adzuna": (
+        lambda s: AdzunaJobSource(
+            app_id=s.adzuna_app_id,
+            app_key=s.adzuna_app_key,
+            user_agent=s.user_agent,
+            timeout=s.http_timeout,
+            min_interval=s.min_interval,
+            max_results=s.max_results,
+        ),
+        True,
+    ),
     "linkedin": (lambda _s: linkedin_source(), False),
     "indeed": (lambda _s: indeed_source(), False),
     "gupy": (lambda _s: gupy_source(), False),
+    "jooble": (lambda _s: jooble_source(), False),
 }
 
 

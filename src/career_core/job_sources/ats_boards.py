@@ -38,12 +38,12 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from ..errors import JobSourceError
+from ..http import HostRateLimiter, HttpClient
 from ..models import Job, Seniority, WorkMode
 from ..text import normalize_text
 from .base import (
     IJobSource,
     JobQuery,
-    RateLimiter,
     SourceResult,
     detect_seniority,
     detect_work_mode,
@@ -246,6 +246,184 @@ class AshbyBoard(IAtsBoard):
         return jobs
 
 
+class WorkableBoard(IAtsBoard):
+    """Workable: `apply.workable.com/api/v1/widget/accounts/{slug}?details=true`.
+
+    Resposta verificada: {"name", "description", "jobs": [{shortcode, title,
+    description, requirements, benefits, url, shortlink, application_url,
+    telecommuting, department, employment_type, experience, published_on,
+    created_at, city, state, country, locations[]}]}
+
+    ATENCAO: `city`, `state` e `country` vem no TOPO do item, nao aninhados
+    num objeto `location` - ao contrario de Greenhouse, Lever e Ashby. Assumir
+    o formato aninhado fazia a localizacao sair vazia e a modalidade cair para
+    `nao_informado`.
+    """
+
+    provider = "workable"
+
+    def endpoint(self, company: str) -> tuple[str, dict[str, Any]]:
+        return (
+            f"https://apply.workable.com/api/v1/widget/accounts/{company}",
+            {"details": "true"},
+        )
+
+    @staticmethod
+    def _location(entry: dict[str, Any]) -> str:
+        parts = [
+            str(entry.get(key) or "").strip()
+            for key in ("city", "state", "country")
+        ]
+        location = ", ".join(p for p in parts if p)
+        if location:
+            return location
+
+        # Fallback: vagas multi-local trazem a lista em `locations`.
+        for item in entry.get("locations") or []:
+            if isinstance(item, dict):
+                pieces = [
+                    str(item.get(key) or "").strip()
+                    for key in ("city", "region", "country")
+                ]
+                joined = ", ".join(p for p in pieces if p)
+                if joined:
+                    return joined
+        return ""
+
+    def parse(self, company: str, payload: Any) -> list[Job]:
+        jobs: list[Job] = []
+        for entry in (payload or {}).get("jobs", []) or []:
+            title = str(entry.get("title") or "").strip()
+            if not title:
+                continue
+
+            location = self._location(entry)
+            description = strip_html(
+                "\n\n".join(
+                    str(entry.get(key) or "")
+                    for key in ("description", "requirements", "benefits")
+                    if entry.get(key)
+                )
+            )
+            mode = (
+                WorkMode.REMOTE
+                if entry.get("telecommuting")
+                else detect_work_mode(location, title, description)
+            )
+            low, high = parse_salary_brl(description)
+
+            # `experience` ("Mid-Senior level") e um sinal melhor que o titulo.
+            seniority = detect_seniority(
+                title, str(entry.get("experience") or ""), description
+            )
+
+            jobs.append(
+                Job(
+                    id=f"workable-{company}-{entry.get('shortcode') or ''}",
+                    source="ats",
+                    title=title,
+                    company=_display_name(company),
+                    url=str(
+                        entry.get("shortlink")
+                        or entry.get("url")
+                        or entry.get("application_url")
+                        or ""
+                    ).strip(),
+                    description=description,
+                    tech_tags=[],
+                    seniority=seniority,
+                    work_mode=mode,
+                    location=location,
+                    country=_infer_country(location, description),
+                    salary_min_brl=low,
+                    salary_max_brl=high,
+                    posted_at=str(entry.get("published_on") or entry.get("created_at") or ""),
+                    raw={"provider": self.provider, "company": company},
+                )
+            )
+        return jobs
+
+
+class SmartRecruitersBoard(IAtsBoard):
+    """SmartRecruiters: `api.smartrecruiters.com/v1/companies/{slug}/postings`.
+
+    Resposta: {"totalFound", "content": [{id, name, ref, releasedDate,
+    location:{city, region, country, remote}, customField, department,
+    typeOfEmployment}]}
+
+    A busca global (`/v1/postings`) responde 404 - so o endpoint por empresa
+    e publico. A descricao completa exige uma segunda chamada por vaga, o que
+    seria dezenas de requisicoes; usamos titulo e localizacao, e a descricao
+    completa vem quando a usuaria abrir o link.
+    """
+
+    provider = "smartrecruiters"
+
+    def endpoint(self, company: str) -> tuple[str, dict[str, Any]]:
+        return (
+            f"https://api.smartrecruiters.com/v1/companies/{company}/postings",
+            {"limit": 100},
+        )
+
+    def parse(self, company: str, payload: Any) -> list[Job]:
+        jobs: list[Job] = []
+        for entry in (payload or {}).get("content", []) or []:
+            title = str(entry.get("name") or "").strip()
+            if not title:
+                continue
+
+            location_data = entry.get("location") or {}
+            # `fullLocation` vem legivel ("Austin, TX, United States"); o
+            # fallback monta a partir das partes, onde `country` vem como
+            # sigla minuscula ("us").
+            location = str(location_data.get("fullLocation") or "").strip()
+            if not location:
+                parts = [
+                    str(location_data.get(key) or "")
+                    for key in ("city", "region", "country")
+                ]
+                location = ", ".join(p for p in parts if p)
+
+            description = str(
+                (entry.get("jobAd") or {}).get("sections", {}) or ""
+            )  # normalmente ausente na listagem
+
+            # A propria API declara a modalidade - melhor que adivinhar.
+            if location_data.get("remote"):
+                mode = WorkMode.REMOTE
+            elif location_data.get("hybrid"):
+                mode = WorkMode.HYBRID
+            else:
+                mode = detect_work_mode(location, title, description)
+
+            # `company.name` e o nome real da empresa, nao o slug.
+            company_name = str(
+                (entry.get("company") or {}).get("name") or ""
+            ).strip() or _display_name(company)
+
+            jobs.append(
+                Job(
+                    id=f"smartrecruiters-{company}-{entry.get('id', '')}",
+                    source="ats",
+                    title=title,
+                    company=company_name,
+                    url=(
+                        f"https://jobs.smartrecruiters.com/{company}/"
+                        f"{entry.get('id', '')}"
+                    ),
+                    description=description,
+                    tech_tags=[],
+                    seniority=detect_seniority(title, description),
+                    work_mode=mode,
+                    location=location,
+                    country=_infer_country(location, description),
+                    posted_at=str(entry.get("releasedDate") or ""),
+                    raw={"provider": self.provider, "company": company},
+                )
+            )
+        return jobs
+
+
 _BR_MARKERS = (
     "brasil", "brazil", "sao paulo", "rio de janeiro", "belo horizonte",
     "curitiba", "porto alegre", "goiania", "florianopolis", "recife",
@@ -262,7 +440,13 @@ def _infer_country(location: str, description: str) -> str:
 
 BOARDS: dict[str, IAtsBoard] = {
     board.provider: board
-    for board in (GreenhouseBoard(), LeverBoard(), AshbyBoard())
+    for board in (
+        GreenhouseBoard(),
+        LeverBoard(),
+        AshbyBoard(),
+        WorkableBoard(),
+        SmartRecruitersBoard(),
+    )
 }
 
 
@@ -305,15 +489,18 @@ class AtsBoardsJobSource(IJobSource):
         min_interval: float = 0.0,
         max_results: int = 25,
         max_workers: int = 4,
+        http_client: HttpClient | None = None,
     ) -> None:
         # `is None` e nao `or`: uma tupla vazia significa "nenhuma empresa
         # configurada" e deve gerar aviso, nao cair no padrao silenciosamente.
         self._companies = DEFAULT_COMPANIES if companies is None else tuple(companies)
-        self._user_agent = user_agent
-        self._timeout = timeout
         self._max_results = max_results
         self._max_workers = max(1, min(max_workers, 6))
-        self._limiter = RateLimiter(min_interval)
+        self._http = http_client or HttpClient(
+            user_agent=user_agent,
+            timeout=timeout,
+            limiter=HostRateLimiter(min_interval),
+        )
 
     # -- infraestrutura ----------------------------------------------------
 
@@ -329,22 +516,16 @@ class AtsBoardsJobSource(IJobSource):
 
         url, params = board.endpoint(company)
         try:
-            import httpx
-
-            self._limiter.wait()
-            with httpx.Client(timeout=self._timeout, follow_redirects=True) as client:
-                response = client.get(
-                    url,
-                    params=params,
-                    headers={"User-Agent": self._user_agent, "Accept": "application/json"},
-                )
-                if response.status_code == 404:
-                    return spec, [], "quadro nao encontrado (slug errado?)"
-                response.raise_for_status()
-                payload = response.json()
+            payload = self._http.get_json(url, params=params)
+        except JobSourceError as exc:
+            message = str(exc)
+            if "404" in message:
+                return spec, [], "quadro nao encontrado (slug errado?)"
+            logger.warning("ats: falha em %s: %s", spec, exc)
+            return spec, [], "indisponivel"
         except Exception as exc:
             logger.warning("ats: falha em %s: %s", spec, exc)
-            return spec, [], f"{type(exc).__name__}"
+            return spec, [], type(exc).__name__
 
         try:
             return spec, board.parse(company, payload), ""
