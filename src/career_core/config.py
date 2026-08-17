@@ -24,6 +24,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _DEFAULT_SOURCES = ("mock",)
 
 
+def _default_ats_companies() -> tuple[str, ...]:
+    # Import tardio: `config` e importado por todo mundo e nao deve puxar
+    # o pacote de fontes junto.
+    from .job_sources.ats_boards import DEFAULT_COMPANIES
+
+    return DEFAULT_COMPANIES
+
+
 def _load_env_file() -> None:
     env_path = PROJECT_ROOT / ".env"
     if env_path.is_file():
@@ -80,6 +88,8 @@ class Settings:
     max_results: int
     min_interval: float
     user_agent: str
+    #: Quadros de ATS a consultar, no formato `provedor:empresa`.
+    ats_companies: tuple[str, ...]
 
     # Derivados -------------------------------------------------------
     profile_dir: Path = field(init=False)
@@ -134,6 +144,7 @@ def build_settings() -> Settings:
         min_interval=_get_float("JOB_SEARCH_MIN_INTERVAL", 2.0),
         user_agent=os.getenv("JOB_SEARCH_USER_AGENT")
         or "career-agent/1.0 (personal job search)",
+        ats_companies=_get_csv("JOB_SEARCH_ATS_COMPANIES", _default_ats_companies()),
     )
 
 

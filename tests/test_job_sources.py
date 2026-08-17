@@ -171,19 +171,24 @@ def test_rede_desligada_bloqueia_fontes_http(settings):
     assert registry.get("mock") is not None
 
 
+def _with_network(settings):
+    """Copia o Settings ligando a rede, sem repetir a lista de campos."""
+    import dataclasses
+
+    fields = {
+        f.name: getattr(settings, f.name)
+        for f in dataclasses.fields(settings)
+        if f.init
+    }
+    fields["enable_network"] = True
+    return settings.__class__(**fields)
+
+
 def test_rede_ligada_libera_fontes_http(settings):
-    registry = JobSourceRegistry(
-        settings.__class__(
-            **{
-                **{k: getattr(settings, k) for k in (
-                    "data_root", "log_dir", "log_level", "min_score", "sources",
-                    "http_timeout", "max_results", "min_interval", "user_agent",
-                )},
-                "enable_network": True,
-            }
-        )
-    )
+    registry = JobSourceRegistry(_with_network(settings))
     assert registry.get("remotive") is not None
+    assert registry.get("arbeitnow") is not None
+    assert registry.get("ats") is not None
 
 
 def test_fonte_desconhecida_devolve_none(settings):

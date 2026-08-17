@@ -14,27 +14,52 @@ Obtencao e normalizacao de vagas, atras da interface `IJobSource`.
 
 | Fonte | Estado | Como e acessada |
 |---|---|---|
-| `mock` | ativa por padrao | Catalogo local ficticio. Offline, deterministico. |
-| `remotive` | opcional | `GET https://remotive.com/api/remote-jobs` — JSON publico, sem auth. Só vagas remotas. |
-| `arbeitnow` | opcional | `GET https://www.arbeitnow.com/api/job-board-api` — JSON publico, sem auth. Base majoritariamente europeia. |
+| `ats` | **padrao** | Quadros publicos de empresas em Greenhouse, Lever e Ashby. **Melhor cobertura de vagas .NET no Brasil.** |
+| `mock` | disponivel | Catalogo local ficticio. Offline, deterministico. Para demonstracao e testes. |
+| `remotive` | disponivel | `GET https://remotive.com/api/remote-jobs` — feed de amostra de 14 vagas que **ignora o parametro de busca**. Pouco util. |
+| `arbeitnow` | disponivel | `GET https://www.arbeitnow.com/api/job-board-api` — 175 vagas, quase todas europeias e presenciais. Pouco util. |
 | `linkedin` | modo manual | Sem API publica de busca. Exigiria sessao autenticada. |
 | `indeed` | modo manual | Acesso publico da antiga Publisher API encerrado. |
 | `gupy` | modo manual | Sem API aberta para candidatos (as APIs sao para clientes ATS). |
 
-Os dois endpoints HTTP foram verificados contra a resposta real antes de
-escrever o parser. Nenhum endpoint foi inventado.
+Todos os endpoints foram verificados contra a resposta real antes de escrever
+o parser. Nenhum endpoint foi inventado.
 
-### Por que `mock` e o padrao
+### A fonte `ats` — a que realmente funciona
 
-A V1 sai offline para que o fluxo inteiro possa ser validado sem depender de
-terceiros, e para que os testes sejam deterministicos. Para ligar as fontes
-reais, no `.env`:
+Greenhouse, Lever e Ashby publicam a lista de vagas de cada empresa num
+endpoint JSON publico e sem autenticacao. E a mesma resposta que alimenta a
+pagina de carreiras que qualquer pessoa abre no navegador.
+
+```
+Greenhouse : GET boards-api.greenhouse.io/v1/boards/{slug}/jobs?content=true
+Lever      : GET api.lever.co/v0/postings/{slug}?mode=json
+Ashby      : GET api.ashbyhq.com/posting-api/job-board/{slug}
+```
+
+Configure as empresas em `JOB_SEARCH_ATS_COMPANIES`:
 
 ```ini
 JOB_SEARCH_ENABLE_NETWORK=true
-JOB_SEARCH_SOURCES=mock,remotive,arbeitnow
-JOB_SEARCH_USER_AGENT=career-agent/1.0 (personal job search; contact: seu-email)
+JOB_SEARCH_SOURCES=ats
+JOB_SEARCH_ATS_COMPANIES=greenhouse:stone,ashby:nubank,lever:neon
 ```
+
+Para descobrir o slug, abra a pagina de carreiras da empresa e olhe a URL:
+`job-boards.greenhouse.io/X` → `greenhouse:X`, `jobs.lever.co/X` → `lever:X`,
+`jobs.ashbyhq.com/X` → `ashby:X`.
+
+Notas de implementacao:
+
+- Os quadros sao buscados em paralelo (4 threads), com timeout por requisicao.
+  Um quadro fora do ar nao derruba os outros — ele e reportado na mensagem.
+- O HTML do Greenhouse vem com entidades escapadas duas vezes; e limpo antes
+  de virar descricao.
+- `department`/`team` **nao** entram em `tech_tags`: eles alimentariam a
+  dimensao Stack como tecnologia exigida, e "Engenharia & Tecnologia" viraria
+  um gap inventado.
+- A pre-ordenacao por relevancia (termo no titulo pesa 3x) acontece **antes**
+  do corte por `max_results`, senao as vagas mais aderentes seriam descartadas.
 
 ## Comportamento em rede
 

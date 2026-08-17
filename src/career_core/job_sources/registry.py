@@ -12,6 +12,7 @@ from collections.abc import Callable
 from ..config import Settings
 from ..models import Job
 from ..text import normalize_company, normalize_title, normalize_url, similarity
+from .ats_boards import AtsBoardsJobSource
 from .base import IJobSource, JobQuery, SourceResult
 from .http_sources import ArbeitnowJobSource, RemotiveJobSource
 from .mock import MockJobSource
@@ -22,6 +23,16 @@ logger = logging.getLogger(__name__)
 #: nome -> (fabrica, exige_rede)
 _FACTORIES: dict[str, tuple[Callable[[Settings], IJobSource], bool]] = {
     "mock": (lambda _s: MockJobSource(), False),
+    "ats": (
+        lambda s: AtsBoardsJobSource(
+            companies=s.ats_companies,
+            user_agent=s.user_agent,
+            timeout=s.http_timeout,
+            min_interval=0.0,  # quadros distintos, hosts distintos
+            max_results=s.max_results,
+        ),
+        True,
+    ),
     "remotive": (
         lambda s: RemotiveJobSource(
             user_agent=s.user_agent,

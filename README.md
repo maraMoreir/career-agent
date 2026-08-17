@@ -184,15 +184,28 @@ Dois deles mudam o score na hora:
 CAREER_DATA_ROOT=C:\career-agent\data
 CAREER_MIN_SCORE=70
 
-JOB_SEARCH_ENABLE_NETWORK=false      # true = habilita APIs publicas reais
-JOB_SEARCH_SOURCES=mock              # mock,remotive,arbeitnow
+JOB_SEARCH_ENABLE_NETWORK=true
+JOB_SEARCH_SOURCES=ats
+JOB_SEARCH_ATS_COMPANIES=greenhouse:stone,ashby:nubank,greenhouse:vtex,...
 JOB_SEARCH_USER_AGENT=career-agent/1.0 (personal job search; contact: SEU-EMAIL)
 ```
 
-A V1 sai de fabrica **offline** (`mock`), para voce validar o fluxo inteiro
-sem depender de terceiros. Quando quiser vagas reais, ligue a rede e ponha seu
-e-mail no User-Agent — identificar-se e a forma educada de consumir uma API
-publica.
+Ponha seu e-mail no User-Agent — identificar-se e a forma educada de consumir
+uma API publica.
+
+### Adicionar empresas a busca
+
+A fonte `ats` so encontra vagas das empresas que voce listar. Para adicionar
+uma, abra a pagina de carreiras dela e olhe a URL:
+
+| URL da pagina de carreiras | Adicione |
+|---|---|
+| `job-boards.greenhouse.io/SLUG` | `greenhouse:SLUG` |
+| `jobs.lever.co/SLUG` | `lever:SLUG` |
+| `jobs.ashbyhq.com/SLUG` | `ashby:SLUG` |
+
+Empresas cuja pagina de carreiras esta na Gupy nao podem ser adicionadas — a
+Gupy nao expoe busca publica. Para essas, use o modo manual.
 
 Nao existe variavel de credencial do LinkedIn neste projeto. Isso e
 deliberado.
@@ -423,23 +436,18 @@ Voce consegue se candidatar por mim no LinkedIn?
 - **LinkedIn, Indeed e Gupy funcionam em modo manual.** Nenhum deles oferece
   API publica de busca para candidatos. Voce copia a vaga; o agente faz o
   resto. Isso e uma escolha de seguranca, nao uma pendencia.
-- **A fonte padrao e `mock`** (catalogo ficticio, offline). Vagas reais exigem
-  ligar `JOB_SEARCH_ENABLE_NETWORK=true`.
-- **A busca automatica praticamente nao serve para vagas .NET no Brasil.**
-  Isso foi medido, nao estimado (agosto/2026):
-  - **Remotive**: o endpoint publico gratuito devolve um feed de **amostra de
-    14 vagas** e **ignora o parametro `search`** — a mesma resposta volta para
-    `.net`, `python` ou uma consulta sem sentido. Nenhuma vaga de engenharia
-    .NET. O projeto passou a filtrar do lado do cliente e a avisar disso.
-  - **Arbeitnow**: 175 vagas no feed, concentradas em Londres, Berlim e
-    Munique, presenciais. **Zero** com .NET/C#.
-  - **LinkedIn, Indeed e Gupy** — onde as vagas brasileiras de fato estao —
-    nao tem API publica de busca para candidatos.
-
-  Na pratica: **use o modo manual.** Voce busca no portal pelo navegador,
-  cola a vaga aqui, e o agente faz score, gaps, curriculo, mensagem e
-  historico. A busca automatica e a parte fraca do sistema; a analise e a
-  parte forte.
+- **A cobertura automatica depende de quais empresas voce configura.** A fonte
+  `ats` varre os quadros publicos das empresas em `JOB_SEARCH_ATS_COMPANIES`.
+  A lista padrao tem 10 empresas verificadas (~1.160 vagas), mas o mercado
+  brasileiro tem muito mais — adicione as empresas que te interessam.
+- **Nem todo ATS e coberto.** Greenhouse, Lever e Ashby tem endpoint publico.
+  Gupy, Solides e Kenoby nao expoem busca publica para candidatos.
+- **Remotive e Arbeitnow servem para pouca coisa** (medido em agosto/2026):
+  a Remotive devolve um feed de **amostra de 14 vagas** que **ignora o
+  parametro `search`**; o Arbeitnow tem 175 vagas quase todas europeias e
+  presenciais, **zero** com .NET/C#. Ficam disponiveis, mas fora do padrao.
+- **LinkedIn, Indeed e Gupy continuam em modo manual** — nao tem API publica
+  de busca para candidatos, e este projeto nao automatiza login nem scraping.
 - **A extracao de requisitos e heuristica.** Funciona bem com descricoes em
   bullets; com texto corrido, os requisitos saem menos estruturados.
 - **A deteccao de senioridade e por palavra-chave** no titulo e na descricao.

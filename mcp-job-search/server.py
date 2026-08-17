@@ -57,35 +57,48 @@ def _guard(func):
     return wrapper
 
 
-def _no_results_guidance() -> str:
-    """Orientacao honesta quando as fontes automaticas nao entregam nada.
+def _no_results_guidance(active_sources: list[str]) -> str:
+    """Orientacao quando a busca nao devolve nada util.
 
-    Existe porque a limitacao e estrutural, nao um acaso da busca: nao ha API
-    publica de vagas com boa cobertura do mercado brasileiro de .NET.
+    O conselho depende de quais fontes estao ligadas: com `ats` ativa existe
+    caminho automatico de verdade; sem ela, so o modo manual resolve.
     """
+    if "ats" not in active_sources:
+        return (
+            "COMO MELHORAR ESTA BUSCA\n"
+            "\n"
+            "A fonte com melhor cobertura de vagas .NET no Brasil ('ats') NAO\n"
+            "esta ligada. Ela consulta os quadros de vagas publicos das proprias\n"
+            "empresas (Greenhouse, Lever, Ashby) - sem login, sem scraping.\n"
+            "\n"
+            "Para ligar, edite C:\\career-agent\\.env:\n"
+            "  JOB_SEARCH_ENABLE_NETWORK=true\n"
+            "  JOB_SEARCH_SOURCES=mock,ats\n"
+            "e reinicie o Claude Desktop.\n"
+            "\n"
+            "Remotive e Arbeitnow existem, mas nao ajudam: a Remotive devolve um\n"
+            "feed de amostra que ignora a busca, e o Arbeitnow e quase todo\n"
+            "europeu e presencial."
+        )
+
     return (
-        "SOBRE O MERCADO BRASILEIRO - leia antes de tentar de novo\n"
+        "COMO AMPLIAR A BUSCA\n"
         "\n"
-        "As fontes automaticas deste projeto tem cobertura fraca para vagas\n"
-        ".NET no Brasil, e isso nao se resolve mudando os termos de busca:\n"
+        "A fonte 'ats' varre os quadros publicos das empresas configuradas. Se\n"
+        "nao veio nada util, tente nesta ordem:\n"
         "\n"
-        "  - Remotive: o endpoint publico gratuito devolve um feed de amostra\n"
-        "    (~14 vagas) e ignora o parametro de pesquisa.\n"
-        "  - Arbeitnow: base quase toda europeia e presencial.\n"
-        "  - LinkedIn, Indeed e Gupy - onde as vagas brasileiras realmente\n"
-        "    estao - nao tem API publica de busca, e este projeto nao\n"
-        "    automatiza login, cookies nem cliques.\n"
+        "  1. Palavras-chave mais amplas: 'backend', 'software engineer',\n"
+        "     'desenvolvedor' - em vez de '.net c#'.\n"
+        "  2. Baixe o score minimo para 60 e veja o que aparece.\n"
+        "  3. Adicione empresas em JOB_SEARCH_ATS_COMPANIES no .env, no\n"
+        "     formato 'greenhouse:empresa'. Descubra o slug abrindo a pagina de\n"
+        "     carreiras da empresa: se a URL for job-boards.greenhouse.io/X,\n"
+        "     jobs.lever.co/X ou jobs.ashbyhq.com/X, use 'greenhouse:X',\n"
+        "     'lever:X' ou 'ashby:X'.\n"
         "\n"
-        "O CAMINHO QUE FUNCIONA (modo manual):\n"
-        "  1. Busque no LinkedIn ou na Gupy pelo navegador, normalmente.\n"
-        "  2. Copie a URL da vaga e o texto da descricao.\n"
-        "  3. Cole aqui: 'Analise esta vaga: <URL>' + a descricao.\n"
-        "\n"
-        "A partir dai o agente faz tudo: score explicado por dimensao, gaps,\n"
-        "curriculo personalizado, mensagem para o recrutador, respostas do\n"
-        "formulario e registro no historico sem duplicata. E ai que esta o\n"
-        "valor do sistema - a busca automatica e o pedaco fraco, a analise\n"
-        "e o pedaco forte."
+        "E sempre vale o MODO MANUAL para LinkedIn e Gupy: copie a URL e a\n"
+        "descricao da vaga e mande 'Analise esta vaga: <URL>'. O agente faz\n"
+        "score, gaps, curriculo, mensagem e historico do mesmo jeito."
     )
 
 
@@ -192,7 +205,7 @@ def search_jobs(
                     _format_job(best_job, 1),
                 ]
             )
-        lines.extend(["", "-" * 60, _no_results_guidance()])
+        lines.extend(["", "-" * 60, _no_results_guidance([r.source for r in results])])
         return "\n".join(lines)
 
     lines.append(f"{len(visible)} vaga(s) com score >= {threshold:g}, ordenadas:")

@@ -90,7 +90,13 @@ _SENIORITY_PATTERNS: tuple[tuple[Seniority, tuple[str, ...]], ...] = (
     (Seniority.INTERN, ("estagio", "estagiario", "estagiaria", "intern ", "internship")),
     (Seniority.TRAINEE, ("trainee",)),
     (Seniority.JUNIOR, ("junior", " jr", "jr.", "entry level", "entry-level", " i ")),
-    (Seniority.LEAD, ("tech lead", "team lead", "lider tecnico", "staff engineer", "principal")),
+    (
+        Seniority.LEAD,
+        (
+            "tech lead", "team lead", "lider tecnico", "staff engineer",
+            "staff software", " staff ", "principal engineer", "principal software",
+        ),
+    ),
     (Seniority.SPECIALIST, ("especialista", "specialist", "expert")),
     (Seniority.SENIOR, ("senior", " sr", "sr.", "sênior", " iii")),
     (Seniority.MID, ("pleno", " pl ", "mid level", "mid-level", "middle", " ii")),

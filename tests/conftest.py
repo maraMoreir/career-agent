@@ -176,6 +176,7 @@ def settings(data_root: Path, tmp_path: Path) -> Settings:
         max_results=25,
         min_interval=0.0,
         user_agent="career-agent-tests/1.0",
+        ats_companies=("greenhouse:exemplo",),
     )
 
 
