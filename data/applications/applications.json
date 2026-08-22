@@ -1,6 +1,367 @@
-﻿{
+{
   "_comment": "ARQUIVO GERADO AUTOMATICAMENTE. Fonte de verdade: applications.db (SQLite). Editar este JSON nao altera nada; ele e sobrescrito a cada mudanca.",
-  "generated_at": "",
-  "count": 0,
-  "applications": []
+  "generated_at": "2026-08-17T19:43:32+00:00",
+  "count": 2,
+  "applications": [
+    {
+      "id": "app-f6f755deef",
+      "created_at": "2026-08-17T19:43:32+00:00",
+      "updated_at": "2026-08-17T19:43:32+00:00",
+      "status": "pending_approval",
+      "company": "VTEX",
+      "role": "Senior Software Engineer, Cloud",
+      "job_url": "https://job-boards.greenhouse.io/vtex/jobs/5601610004",
+      "job_source": "manual",
+      "score": 86.2,
+      "recommendation": "PRIORIDADE",
+      "score_breakdown": [
+        {
+          "key": "stack",
+          "label": "Stack tecnica",
+          "points": 20.0,
+          "max_points": 20.0,
+          "rationale": "3/3 tecnologias exigidas estao no perfil (100% de cobertura); core .NET/C# presente.",
+          "matched": [
+            ".net",
+            "kubernetes",
+            "sistemas distribuídos"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "dotnet",
+          "label": "Experiencia .NET",
+          "points": 14.0,
+          "max_points": 14.0,
+          "rationale": "1/1 termos do tema no perfil; citada nos requisitos.",
+          "matched": [
+            ".net"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "seniority",
+          "label": "Senioridade",
+          "points": 14.0,
+          "max_points": 14.0,
+          "rationale": "Nivel 'senior' e exatamente o alvo.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "backend",
+          "label": "Foco backend",
+          "points": 4.4,
+          "max_points": 8.0,
+          "rationale": "Backend presente, mas nao dominante (2 sinal/sinais).",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "architecture",
+          "label": "Arquitetura",
+          "points": 8.0,
+          "max_points": 8.0,
+          "rationale": "1/1 termos do tema no perfil; citada nos requisitos.",
+          "matched": [
+            "sistemas distribuídos"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "salary",
+          "label": "Salario",
+          "points": 6.0,
+          "max_points": 10.0,
+          "rationale": "Salario nao divulgado (comum no mercado BR); nota neutra. Confirme a faixa antes de avancar.",
+          "matched": [],
+          "gaps": [
+            "faixa salarial nao divulgada"
+          ]
+        },
+        {
+          "key": "location",
+          "label": "Localizacao",
+          "points": 7.0,
+          "max_points": 7.0,
+          "rationale": "Remoto sem restricao geografica incompativel - localizacao deixa de ser um problema.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "work_mode",
+          "label": "Modalidade",
+          "points": 7.0,
+          "max_points": 7.0,
+          "rationale": "'remoto' e a 1a opcao na sua ordem de preferencia (remoto > hibrido > presencial).",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "sap",
+          "label": "Experiencia SAP",
+          "points": 2.25,
+          "max_points": 5.0,
+          "rationale": "a vaga nao envolve SAP; sem impacto no ranking.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "fiscal",
+          "label": "Experiencia fiscal",
+          "points": 1.8,
+          "max_points": 4.0,
+          "rationale": "a vaga nao envolve dominio fiscal; sem impacto no ranking.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "company",
+          "label": "Empresa",
+          "points": 1.8,
+          "max_points": 3.0,
+          "rationale": "Empresa 'VTEX' sem historico nas suas listas; sem sinais fortes.",
+          "matched": [],
+          "gaps": []
+        }
+      ],
+      "salary_text": "nao divulgado",
+      "work_mode": "remoto",
+      "location": "Brazil",
+      "key_requirements": [],
+      "matched_technologies": [
+        ".net",
+        "kubernetes",
+        "sistemas distribuídos"
+      ],
+      "gaps": [
+        "faixa salarial nao divulgada"
+      ],
+      "recommended_resume": "curriculo-otimizado-vtex.md",
+      "tailored_summary": "Desenvolvedora Backend/FullStack | Engenheira de Software com IA | Foco em .NET. Atuacao com .NET, Kubernetes, Sistemas distribuídos - tecnologias que constam no perfil e que a vaga de Senior Software Engineer, Cloud solicita. Trabalha com Clean Architecture, SOLID, DDD, Design Patterns. Experiencia de dominio em Integrações com SAP, SAP Business One, SAP DI API, SAP UI API.",
+      "recruiter_message": "Ola! Tudo bem?\n\nVi a vaga de Senior Software Engineer, Cloud na VTEX e o perfil conversa diretamente com o que eu faco.\n\nTrabalho com .NET, Kubernetes, Sistemas distribuídos.\nNo dia a dia aplico Clean Architecture, SOLID, DDD.\nTambem tenho experiencia em Integrações com SAP, SAP Business One, SAP DI API.\n\nFico a disposicao para conversar sobre a oportunidade e mandar meu curriculo completo.\n\nObrigada!\n[seu nome]\n\n---\nRASCUNHO - revise, ajuste o tom e envie voce mesma. O Career Agent nao envia mensagens.",
+      "suggested_answers": [
+        {
+          "question": "Por que voce se interessou por esta vaga?",
+          "answer": "A vaga de Senior Software Engineer, Cloud pede .NET, Kubernetes, Sistemas distribuídos, que e exatamente o que eu trabalho hoje. Alem disso, aplico Clean Architecture, SOLID, DDD, que aparece nos requisitos.",
+          "grounded_in": [
+            ".NET",
+            "Kubernetes",
+            "Sistemas distribuídos"
+          ]
+        },
+        {
+          "question": "Fale sobre sua experiencia tecnica.",
+          "answer": "Desenvolvedora Backend/FullStack e Engenheira de Software com IA, com foco em\n.NET. Atuacao em backend com C#, ASP.NET Core e Entity Framework Core,\naplicando Clean Architecture, SOLID e DDD na construcao de APIs REST e\nsistemas distribuidos. Experiencia em integracoes com SAP e em sistemas\nfiscais brasileiros.",
+          "grounded_in": [
+            "data/profile/profile.md"
+          ]
+        },
+        {
+          "question": "Qual foi um desafio tecnico relevante que voce enfrentou?",
+          "answer": "Trabalho com Integrações com SAP, SAP Business One, SAP DI API - dominio com regras complexas e integracao entre sistemas. PREENCHA AQUI com um caso concreto seu: contexto, o que voce fez e qual foi o resultado. O agente nao inventa exemplos por voce.",
+          "grounded_in": [
+            "Integrações com SAP",
+            "SAP Business One",
+            "SAP DI API"
+          ]
+        },
+        {
+          "question": "Qual sua pretensao salarial?",
+          "answer": "PREENCHA: defina sua faixa em data/profile/preferences.md para o agente sugerir esta resposta.",
+          "grounded_in": [
+            "data/profile/preferences.md"
+          ]
+        }
+      ],
+      "notes": "Recomendacao do score: PRIORIDADE (86.2/100).\nAuditoria factual: OK - nenhuma tecnologia fora do perfil foi afirmada.\n[duplicidade: duplicate]",
+      "history": [
+        {
+          "status": "pending_approval",
+          "at": "2026-08-17T19:43:32+00:00",
+          "note": "Candidatura registrada."
+        }
+      ]
+    },
+    {
+      "id": "app-306b0c46ce",
+      "created_at": "2026-08-17T19:36:30+00:00",
+      "updated_at": "2026-08-17T19:36:30+00:00",
+      "status": "pending_approval",
+      "company": "VTEX",
+      "role": "Senior Software Engineer, Cloud",
+      "job_url": "https://job-boards.greenhouse.io/vtex/jobs/5601610004",
+      "job_source": "manual",
+      "score": 86.2,
+      "recommendation": "PRIORIDADE",
+      "score_breakdown": [
+        {
+          "key": "stack",
+          "label": "Stack tecnica",
+          "points": 20.0,
+          "max_points": 20.0,
+          "rationale": "3/3 tecnologias exigidas estao no perfil (100% de cobertura); core .NET/C# presente.",
+          "matched": [
+            ".net",
+            "kubernetes",
+            "sistemas distribuídos"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "dotnet",
+          "label": "Experiencia .NET",
+          "points": 14.0,
+          "max_points": 14.0,
+          "rationale": "1/1 termos do tema no perfil; citada nos requisitos.",
+          "matched": [
+            ".net"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "seniority",
+          "label": "Senioridade",
+          "points": 14.0,
+          "max_points": 14.0,
+          "rationale": "Nivel 'senior' e exatamente o alvo.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "backend",
+          "label": "Foco backend",
+          "points": 4.4,
+          "max_points": 8.0,
+          "rationale": "Backend presente, mas nao dominante (2 sinal/sinais).",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "architecture",
+          "label": "Arquitetura",
+          "points": 8.0,
+          "max_points": 8.0,
+          "rationale": "1/1 termos do tema no perfil; citada nos requisitos.",
+          "matched": [
+            "sistemas distribuídos"
+          ],
+          "gaps": []
+        },
+        {
+          "key": "salary",
+          "label": "Salario",
+          "points": 6.0,
+          "max_points": 10.0,
+          "rationale": "Salario nao divulgado (comum no mercado BR); nota neutra. Confirme a faixa antes de avancar.",
+          "matched": [],
+          "gaps": [
+            "faixa salarial nao divulgada"
+          ]
+        },
+        {
+          "key": "location",
+          "label": "Localizacao",
+          "points": 7.0,
+          "max_points": 7.0,
+          "rationale": "Remoto sem restricao geografica incompativel - localizacao deixa de ser um problema.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "work_mode",
+          "label": "Modalidade",
+          "points": 7.0,
+          "max_points": 7.0,
+          "rationale": "'remoto' e a 1a opcao na sua ordem de preferencia (remoto > hibrido > presencial).",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "sap",
+          "label": "Experiencia SAP",
+          "points": 2.25,
+          "max_points": 5.0,
+          "rationale": "a vaga nao envolve SAP; sem impacto no ranking.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "fiscal",
+          "label": "Experiencia fiscal",
+          "points": 1.8,
+          "max_points": 4.0,
+          "rationale": "a vaga nao envolve dominio fiscal; sem impacto no ranking.",
+          "matched": [],
+          "gaps": []
+        },
+        {
+          "key": "company",
+          "label": "Empresa",
+          "points": 1.8,
+          "max_points": 3.0,
+          "rationale": "Empresa 'VTEX' sem historico nas suas listas; sem sinais fortes.",
+          "matched": [],
+          "gaps": []
+        }
+      ],
+      "salary_text": "nao divulgado",
+      "work_mode": "remoto",
+      "location": "Brazil",
+      "key_requirements": [],
+      "matched_technologies": [
+        ".net",
+        "kubernetes",
+        "sistemas distribuídos"
+      ],
+      "gaps": [
+        "faixa salarial nao divulgada"
+      ],
+      "recommended_resume": "curriculo-principal.md",
+      "tailored_summary": "Desenvolvedora Backend/FullStack | Engenheira de Software com IA | Foco em .NET. Atuacao com .NET, Kubernetes, Sistemas distribuídos - tecnologias que constam no perfil e que a vaga de Senior Software Engineer, Cloud solicita. Trabalha com Clean Architecture, SOLID, DDD, Design Patterns. Experiencia de dominio em Integrações com SAP, SAP Business One, SAP DI API, SAP UI API.",
+      "recruiter_message": "Ola! Tudo bem?\n\nVi a vaga de Senior Software Engineer, Cloud na VTEX e o perfil conversa diretamente com o que eu faco.\n\nTrabalho com .NET, Kubernetes, Sistemas distribuídos.\nNo dia a dia aplico Clean Architecture, SOLID, DDD.\nTambem tenho experiencia em Integrações com SAP, SAP Business One, SAP DI API.\n\nFico a disposicao para conversar sobre a oportunidade e mandar meu curriculo completo.\n\nObrigada!\n[seu nome]\n\n---\nRASCUNHO - revise, ajuste o tom e envie voce mesma. O Career Agent nao envia mensagens.",
+      "suggested_answers": [
+        {
+          "question": "Por que voce se interessou por esta vaga?",
+          "answer": "A vaga de Senior Software Engineer, Cloud pede .NET, Kubernetes, Sistemas distribuídos, que e exatamente o que eu trabalho hoje. Alem disso, aplico Clean Architecture, SOLID, DDD, que aparece nos requisitos.",
+          "grounded_in": [
+            ".NET",
+            "Kubernetes",
+            "Sistemas distribuídos"
+          ]
+        },
+        {
+          "question": "Fale sobre sua experiencia tecnica.",
+          "answer": "Desenvolvedora Backend/FullStack e Engenheira de Software com IA, com foco em\n.NET. Atuacao em backend com C#, ASP.NET Core e Entity Framework Core,\naplicando Clean Architecture, SOLID e DDD na construcao de APIs REST e\nsistemas distribuidos. Experiencia em integracoes com SAP e em sistemas\nfiscais brasileiros.",
+          "grounded_in": [
+            "data/profile/profile.md"
+          ]
+        },
+        {
+          "question": "Qual foi um desafio tecnico relevante que voce enfrentou?",
+          "answer": "Trabalho com Integrações com SAP, SAP Business One, SAP DI API - dominio com regras complexas e integracao entre sistemas. PREENCHA AQUI com um caso concreto seu: contexto, o que voce fez e qual foi o resultado. O agente nao inventa exemplos por voce.",
+          "grounded_in": [
+            "Integrações com SAP",
+            "SAP Business One",
+            "SAP DI API"
+          ]
+        },
+        {
+          "question": "Qual sua pretensao salarial?",
+          "answer": "PREENCHA: defina sua faixa em data/profile/preferences.md para o agente sugerir esta resposta.",
+          "grounded_in": [
+            "data/profile/preferences.md"
+          ]
+        }
+      ],
+      "notes": "Recomendacao do score: PRIORIDADE (86.2/100).\nAuditoria factual: OK - nenhuma tecnologia fora do perfil foi afirmada.",
+      "history": [
+        {
+          "status": "pending_approval",
+          "at": "2026-08-17T19:36:30+00:00",
+          "note": "Candidatura registrada."
+        }
+      ]
+    }
+  ]
 }
